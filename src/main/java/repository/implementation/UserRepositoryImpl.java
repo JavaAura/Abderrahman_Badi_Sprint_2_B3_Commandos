@@ -14,16 +14,11 @@ import model.User;
 import repository.interfaces.UserRepository;
 import util.PersistenceUtil;
 
-public class UserRepositoryImp implements UserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImp.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
 	private static final String LOGIN = "FROM User WHERE email = :email";
 
-	private final SessionFactory sessionFactory;
-
-	public UserRepositoryImp(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
 
 	@Override
 	public Optional<User> login(String email, String password) {
