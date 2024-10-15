@@ -6,17 +6,17 @@ import model.enums.Statut;
 
 public interface OrderRepository {
 
-    List<Order> findOrdersByClient(Long clientId, int page, int size, String searchQuery);
+    List<Order> findByClient(Long clientId, int page, int size, String searchQuery);
 
-    List<Order> findAllOrders(int page, int size);
+    List<Order> findAll(int page, int size);
 
-    Order createOrder(Order order);
+    Order create(Order order);
 
-    Order updateOrder(Order order) ;
+    Order update(Order order) ;
 
-    void deleteOrder(Long orderId);
+    void delete(Long orderId);
 
-    Order findOrderById(Long orderId);
+    Order findById(Long orderId);
 
-    boolean canModifyOrder(Order order);
+    boolean canModify(Order order);
 }

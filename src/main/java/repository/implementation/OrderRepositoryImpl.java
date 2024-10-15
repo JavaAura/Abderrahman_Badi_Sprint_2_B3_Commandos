@@ -7,38 +7,39 @@ import java.util.List;
 
 public class OrderRepositoryImpl implements OrderRepository {
 
+
     @Override
-    public List<Order> findOrdersByClient(Long clientId, int page, int size, String searchQuery) {
+    public List<Order> findByClient(Long clientId, int page, int size, String searchQuery) {
         return null;
     }
 
     @Override
-    public List<Order> findAllOrders(int page, int size) {
+    public List<Order> findAll(int page, int size) {
         return null;
     }
 
     @Override
-    public Order createOrder(Order order) {
+    public Order create(Order order) {
         return null;
     }
 
     @Override
-    public Order updateOrder(Order order) {
+    public Order update(Order order) {
         return null;
     }
 
     @Override
-    public void deleteOrder(Long orderId) {
+    public void delete(Long orderId) {
 
     }
 
     @Override
-    public Order findOrderById(Long orderId) {
+    public Order findById(Long orderId) {
         return null;
     }
 
     @Override
-    public boolean canModifyOrder(Order order) {
+    public boolean canModify(Order order) {
         return false;
     }
 }
