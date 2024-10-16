@@ -24,6 +24,4 @@ public class Admin extends User {
 	public void setLevelAccess(int levelAccess) {
 		this.levelAccess = levelAccess;
 	}
-    
-    
 }
