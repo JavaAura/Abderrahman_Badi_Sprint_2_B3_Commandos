@@ -6,9 +6,9 @@ import model.enums.Statut;
 
 public interface OrderRepository {
 
-    List<Order> findByClient(Long clientId, int page, int size, String searchQuery);
+    List<Order> getByClient(Long clientId, int page, int size, String searchQuery);
 
-    List<Order> findAll(int page, int size);
+    List<Order> getdAll(int page, int size);
 
     Order create(Order order);
 
@@ -16,7 +16,7 @@ public interface OrderRepository {
 
     void delete(Long orderId);
 
-    Order findById(Long orderId);
+    Order getById(Long orderId);
 
     boolean canModify(Order order);
 }

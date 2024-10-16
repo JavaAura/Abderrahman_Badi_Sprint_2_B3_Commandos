@@ -14,15 +14,15 @@ public class OrderRepositoryImpl implements OrderRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Order> findByClient(Long clientId, int page, int size, String searchQuery) {
-        // Query to fetch orders for a specific client with pagination
+    public List<Order> getByClient(Long clientId, int page, int size, String searchQuery) {
+
         String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId AND " +
                 "(o.orderStatut LIKE :searchQuery OR o.id LIKE :searchQuery)";
         TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
         query.setParameter("clientId", clientId);
         query.setParameter("searchQuery", "%" + searchQuery + "%");
 
-        // Set pagination
+
         query.setFirstResult(page * size);
         query.setMaxResults(size);
 
@@ -30,7 +30,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAll(int page, int size) {
+    public List<Order> getdAll(int page, int size) {
         TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
         query.setFirstResult(page * size);
         query.setMaxResults(size);
@@ -58,13 +58,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order findById(Long orderId) {
+    public Order getById(Long orderId) {
         return entityManager.find(Order.class, orderId);
     }
 
     @Override
     public boolean canModify(Order order) {
-        // Logic to check if an order can be modified
+
         return false;
     }
 }
