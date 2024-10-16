@@ -48,6 +48,19 @@ public class User {
 	@Column(name = "role", nullable = false)
 	private Role role;
 
+	@Override
+	public String toString() {
+		return "User{" +
+				"id=" + id +
+				", firstName='" + firstName + '\'' +
+				", lastName='" + lastName + '\'' +
+				", email=" + email +
+				", password=" + password +
+				", role=" + role +
+				", isDeleted=" + isDeleted +
+				'}';
+	}
+
 	public Long getId() {
 		return id;
 	}
