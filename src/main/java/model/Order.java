@@ -20,8 +20,7 @@ import javax.validation.constraints.NotNull;
 import model.enums.Statut;
 
 @Entity
-@Table(name = "order")
-
+@Table(name = "orders")
 public class Order {
 
 	@Id
@@ -31,9 +30,9 @@ public class Order {
 	@Column(name = "orderDate")
 	private LocalDate orderDate;
 
-	@NotNull(message = "Role  shouldn't be null")
+	@NotNull(message = "Order status shouldn't be null")
 	@Enumerated(EnumType.STRING)
-	@Column(name = "orderStatut", nullable = false, columnDefinition = "ENUM('WAITING','PROCESSING','SHIPPED','DELIVERED','CANCELED')")
+	@Column(name = "orderStatut", nullable = false, columnDefinition = "order_statut DEFAULT 'WAITING'")
 	private Statut orderStatut;
 
 	@JoinColumn(name = "client_id", nullable = false)

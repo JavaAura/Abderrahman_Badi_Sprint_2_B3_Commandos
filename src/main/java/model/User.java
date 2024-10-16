@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import model.enums.Role;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class User {
 
@@ -26,27 +26,27 @@ public class User {
 	@NotNull(message = "First Name shouldn't be null")
 	@Column(name = "firstName", nullable = false)
 	private String firstName;
-	
+
 	@NotNull(message = "Last Name shouldn't be null")
-	@Column(name="lastName",nullable = false)
+	@Column(name = "lastName", nullable = false)
 	private String lastName;
-	
+
 	@NotNull(message = "Email  shouldn't be null")
-	@Column(name="email", nullable = false , unique = true)
+	@Column(name = "email", nullable = false, unique = true)
 	private String email;
-	
+
 	@NotNull(message = "Password  shouldn't be null")
-	@Column(name="password",nullable = false)
+	@Column(name = "password", nullable = false)
 	private String password;
 
 	@NotNull
-	@Column(name="is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+	@Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
 	private boolean isDeleted;
-	
-	@NotNull(message = "Role  shouldn't be null")
-	@Enumerated(EnumType.STRING) 
-	@Column(name="role", nullable = false , columnDefinition= "ENUM('ADMIN','CLIENT')")
-	private Role role ;
+
+	@NotNull(message = "Role shouldn't be null")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role", nullable = false, columnDefinition = "user_role")
+	private Role role;
 
 	public Long getId() {
 		return id;
@@ -95,15 +95,12 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	
-	
-	
 
+	public boolean getIsDeleted() {
+		return this.isDeleted;
+	}
 
-    public boolean getIsDeleted() {
-      return this.isDeleted;
-    }
-    public void setIsDeleted(boolean value) {
-      this.isDeleted = value;
-    }
+	public void setIsDeleted(boolean value) {
+		this.isDeleted = value;
+	}
 }
