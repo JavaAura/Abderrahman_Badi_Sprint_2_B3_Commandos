@@ -7,6 +7,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -14,6 +16,7 @@ import model.enums.Role;
 
 @Entity
 @Table(name = "user")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class User {
 
 	@Id
@@ -35,6 +38,10 @@ public class User {
 	@NotNull(message = "Password  shouldn't be null")
 	@Column(name="password",nullable = false)
 	private String password;
+
+	@NotNull
+	@Column(name="is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+	private boolean isDeleted;
 	
 	@NotNull(message = "Role  shouldn't be null")
 	@Enumerated(EnumType.STRING) 
@@ -92,4 +99,11 @@ public class User {
 	
 	
 
+
+    public boolean getIsDeleted() {
+      return this.isDeleted;
+    }
+    public void setIsDeleted(boolean value) {
+      this.isDeleted = value;
+    }
 }

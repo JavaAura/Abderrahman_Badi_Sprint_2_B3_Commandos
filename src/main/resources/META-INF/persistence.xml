@@ -7,9 +7,11 @@
     <persistence-unit name="COMMANDOS_PU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>model. </class>
-        <class>model. </class>
-        <class>model. </class>
+        <class>model.User</class>
+        <class>model.Client</class>
+        <class>model.Admin</class>
+        <class>model.Order</class>
+        <class>model.Product</class>
 
         <properties>
             <!-- PostgreSQL configuration -->
@@ -18,11 +20,11 @@
             <property name="javax.persistence.jdbc.user" value="${DB_USER}" />
             <property name="javax.persistence.jdbc.password" value="${DB_PASSWORD}" />
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
-            <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.hbm2ddl.auto" value="create" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.use_sql_comments" value="true" />
-            <property name="hibernate.logging.level" value="WARN" />
+            <property name="hibernate.logging.level" value="DEBUG" />
         </properties>
 
     </persistence-unit>
@@ -30,9 +32,11 @@
     <persistence-unit name="test_COMMANDOS_PU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>model. </class>
-        <class>model. </class>
-        <class>model. </class>
+        <class>model.User</class>
+        <class>model.Client</class>
+        <class>model.Admin</class>
+        <class>model.Order</class>
+        <class>model.Product</class>
 
         <properties>
             <!-- PostgreSQL configuration for testing -->
@@ -45,7 +49,7 @@
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.use_sql_comments" value="true" />
-            <property name="hibernate.logging.level" value="WARN" />
+            <property name="hibernate.logging.level" value="DEBUG" />
         </properties>
 
     </persistence-unit>
