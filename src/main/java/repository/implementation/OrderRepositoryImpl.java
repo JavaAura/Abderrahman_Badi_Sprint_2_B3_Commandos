@@ -51,7 +51,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public void delete(Long orderId) {
-        Order order = findById(orderId);
+        Order order = getById(orderId);
         if (order != null) {
             entityManager.remove(order);
         }
