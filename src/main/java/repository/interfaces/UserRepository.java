@@ -11,6 +11,8 @@ public interface UserRepository {
 
 	List<User> getAll(int pageNumber);
 
+	List<User> getAllClients(int pageNumber);
+
 	void save(User user);
 
 	void update(User user);
