@@ -45,7 +45,7 @@ public class User {
 
 	@NotNull(message = "Role shouldn't be null")
 	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false, columnDefinition = "user_role")
+	@Column(name = "role", nullable = false)
 	private Role role;
 
 	public Long getId() {

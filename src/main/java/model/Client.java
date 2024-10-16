@@ -14,11 +14,11 @@ import javax.validation.constraints.NotNull;
 public class Client extends User {
 
     @NotNull(message = "Delivery Address shouldn't be null")
-    @Column(name = "addressDelivery", nullable = false)
+    @Column(name = "addressDelivery", nullable = true)
     private String addressDelivery;
 
     @NotNull(message = "Payment Method shouldn't be null")
-    @Column(name = "paymentMethod", nullable = false)
+    @Column(name = "paymentMethod", nullable = true)
     private String paymentMethod;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
