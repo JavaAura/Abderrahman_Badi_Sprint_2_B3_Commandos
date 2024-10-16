@@ -1,6 +1,5 @@
 package repository.implementation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,12 +76,12 @@ public class UserRepositoryImpl implements UserRepository {
 		int startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
 
 		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
-		List<User> users = new ArrayList<>();
+		List<User> users = null;
 
 		try {
 			TypedQuery<User> typedQuery;
 
-			typedQuery = entityManager.createQuery("SELECT u FROM User u WHERE u.levelaccess != 1", User.class);
+			typedQuery = entityManager.createQuery("SELECT u FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1)", User.class);
 
 			typedQuery.setFirstResult(startIndex);
 			typedQuery.setMaxResults(ITEMS_PER_PAGE);
@@ -96,7 +95,32 @@ public class UserRepositoryImpl implements UserRepository {
 		}
 
 		return users;
+	}
 
+	@Override
+	public List<User> getAllClients(int pageNumber) {
+		int startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+
+		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+		List<User> users = null;
+
+		try {
+			TypedQuery<User> typedQuery;
+
+			typedQuery = entityManager.createQuery("SELECT c FROM Client c", User.class);
+
+			typedQuery.setFirstResult(startIndex);
+			typedQuery.setMaxResults(ITEMS_PER_PAGE);
+
+			users = typedQuery.getResultList();
+
+		} catch (Exception e) {
+			logger.error("Error listing users: ", e);
+		} finally {
+			entityManager.close();
+		}
+
+		return users;
 	}
 
 	@Override
