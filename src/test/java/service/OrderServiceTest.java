@@ -112,7 +112,7 @@ class OrderServiceTest {
 
     @Test
     void testCanModifyOrder() {
-        Order order = new Order(); // Create a sample order
+        Order order = new Order();
         
         when(orderRepository.canModify(order)).thenReturn(true);
         
