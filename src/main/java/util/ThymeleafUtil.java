@@ -15,9 +15,12 @@ public class ThymeleafUtil {
             templateResolver.setPrefix("/WEB-INF/templates/"); // Path to your templates folder
             templateResolver.setSuffix(".html");
             templateResolver.setTemplateMode("HTML5");
+            templateResolver.setCacheable(false); 
+         
 
             templateEngine = new TemplateEngine();
             templateEngine.setTemplateResolver(templateResolver);
+          
         }
         return templateEngine;
     }
