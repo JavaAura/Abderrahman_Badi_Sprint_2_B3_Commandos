@@ -1,7 +1,8 @@
 package model;
 
 import java.time.LocalDate;
- 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -17,8 +20,7 @@ import javax.validation.constraints.NotNull;
 import model.enums.Statut;
 
 @Entity
-@Table(name = "order")
-
+@Table(name = "orders")
 public class Order {
 
 	@Id
@@ -28,18 +30,18 @@ public class Order {
 	@Column(name = "orderDate")
 	private LocalDate orderDate;
 
-	@NotNull(message = "Role  shouldn't be null")
+	@NotNull(message = "Order status shouldn't be null")
 	@Enumerated(EnumType.STRING)
-	@Column(name = "orderStatut", nullable = false, columnDefinition = "ENUM('WAITING','PROCESSING','SHIPPED','DELIVERED','CANCELED')")
+	@Column(name = "orderStatut", nullable = false, columnDefinition = "DEFAULT 'WAITING'")
 	private Statut orderStatut;
 
-	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
-	private Client clientId;
-
 	@ManyToOne
-	@JoinColumn(name = "product_id", nullable = false)
-	private Product productId;
+	private Client client;
+
+	@ManyToMany
+	@JoinTable(name = "order_product", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
+	private List<Product> products;
 
 	public Long getId() {
 		return id;
@@ -65,21 +67,10 @@ public class Order {
 		this.orderStatut = orderStatut;
 	}
 
-	public Client getClientId() {
-		return clientId;
-	}
-
-	public void setClientId(Client clientId) {
-		this.clientId = clientId;
-	}
-
-	public Product getProductId() {
-		return productId;
-	}
-
-	public void setProductId(Product productId) {
-		this.productId = productId;
-	}
-	
-	
+    public List<Product> getProducts() {
+      return this.products;
+    }
+    public void setProducts(List<Product> value) {
+      this.products = value;
+    }
 }

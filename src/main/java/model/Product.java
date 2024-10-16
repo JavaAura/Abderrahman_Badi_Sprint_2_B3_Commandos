@@ -10,8 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;  
-import javax.validation.constraints.Min;  
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Min;
 
 @Entity
 @Table(name = "product")
@@ -30,18 +30,21 @@ public class Product {
     private String description;
 
     @NotNull(message = "Price shouldn't be null")
-    @Positive(message = "Price must be greater than zero")  
-    @Column(name = "price", nullable = false)  
+    @Positive(message = "Price must be greater than zero")
+    @Column(name = "price", nullable = false)
     private double price;
 
     @NotNull(message = "Stock shouldn't be null")
-    @Min(value = 0, message = "Stock must be zero or more")  
-    @Column(name = "stock", nullable = false)  
+    @Min(value = 0, message = "Stock must be zero or more")
+    @Column(name = "stock", nullable = false)
     private double stock;
-    
-    @ManyToMany(mappedBy = "products")
-    private List<Client> clients;
 
+    @NotNull
+	@Column(name="is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean isDeleted;
+
+    @ManyToMany(mappedBy = "products")
+    private List<Order> orders;
 
     // Getters and Setters
     public Long getId() {
@@ -82,5 +85,19 @@ public class Product {
 
     public void setStock(double stock) {
         this.stock = stock;
+    }
+
+    public List<Order> getOrders() {
+      return this.orders;
+    }
+    public void setOrders(List<Order> value) {
+      this.orders = value;
+    }
+
+    public boolean getIsDeleted() {
+      return this.isDeleted;
+    }
+    public void setIsDeleted(boolean value) {
+      this.isDeleted = value;
     }
 }
