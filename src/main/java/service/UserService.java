@@ -12,6 +12,10 @@ public class UserService {
 	public UserService(UserRepository userRepository) {
 		this.userRepository = userRepository;
 	}
+
+	public Optional<User> getUser(long id){
+		return userRepository.get(id);
+	}
 	
 	public Optional<User> login(String email , String Password){
 		return userRepository.login(email, Password);
