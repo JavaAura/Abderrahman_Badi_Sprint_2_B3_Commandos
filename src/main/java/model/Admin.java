@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 public class Admin extends User {
 	
     @NotNull(message = "levelAccess shouldn't be null")
-	@Column(name = "levelAccess",nullable = false)
+	@Column(name = "levelAccess", nullable = true)
 	private int levelAccess;
     
     public Admin() {

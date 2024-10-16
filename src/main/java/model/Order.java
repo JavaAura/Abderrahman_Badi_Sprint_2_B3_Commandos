@@ -32,7 +32,7 @@ public class Order {
 
 	@NotNull(message = "Order status shouldn't be null")
 	@Enumerated(EnumType.STRING)
-	@Column(name = "orderStatut", nullable = false, columnDefinition = "order_statut DEFAULT 'WAITING'")
+	@Column(name = "orderStatut", nullable = false, columnDefinition = "VARCHAR(10) DEFAULT 'WAITING'")
 	private Statut orderStatut;
 
 	@JoinColumn(name = "client_id", nullable = false)
