@@ -1,11 +1,32 @@
 <!DOCTYPE html>
 <html
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{dashboard_layout}"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{dashboard_layout}"
 >
-  <body>
-    <section layout:fragment="content">
-      <p>Oreder boomm</p>
-    </section>
-  </body>
+<body >
+<div class="bg-gray-100 h-screen flex items-center justify-center">
+<section layout:fragment="content" class="container mx-auto py-8">
+  <h2 class="text-2xl font-semibold mb-6 text-center">Order List</h2>
+  <!-- Table displaying order date, status, and client name with Tailwind CSS styling -->
+  <div class="overflow-x-auto mx-auto w-full max-w-4xl">
+    <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+      <thead class="bg-gray-200">
+      <tr>
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Order Date</th>
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Order Status</th>
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Client Name</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="order : ${orderList_No_historique}" class="border-b hover:bg-gray-100">
+        <td class="px-4 py-2 text-sm text-gray-700" th:text="${order.orderDate}">Order Date</td>
+        <td class="px-4 py-2 text-sm text-gray-700" th:text="${order.orderStatut}">Order Status</td>
+        <td class="px-4 py-2 text-sm text-gray-700" th:text="${order.client.firstName}">Client Name</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+</div>
+</body>
 </html>

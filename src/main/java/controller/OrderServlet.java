@@ -55,7 +55,9 @@ public class OrderServlet extends HttpServlet {
 		int page = Integer.parseInt(request.getParameter("page") != null ? request.getParameter("page") : "0");
 		int size = 5;
 
+
 		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(page, size);
+		System.out.println(orderList_No_historique);
 		context.setVariable("orderList_No_historique", orderList_No_historique);
 
 		response.setContentType("text/html;charset=UTF-8");

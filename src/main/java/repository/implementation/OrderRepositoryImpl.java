@@ -24,7 +24,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
         if (searchQuery == null) {
-            searchQuery = ""; 
+            searchQuery = "";
         }
 
         query.setParameter("searchQuery", "%" + searchQuery + "%");
