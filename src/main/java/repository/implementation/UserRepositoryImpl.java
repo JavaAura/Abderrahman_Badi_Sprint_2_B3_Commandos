@@ -72,7 +72,7 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public List<User> getAll(int pageNumber) {
+	public List<User> getAll(int pageNumber, int accessLevel) {
 		int startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
 
 		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
@@ -81,7 +81,17 @@ public class UserRepositoryImpl implements UserRepository {
 		try {
 			TypedQuery<User> typedQuery;
 
-			typedQuery = entityManager.createQuery("SELECT u FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1)", User.class);
+			if (accessLevel == 1) {
+                typedQuery = entityManager
+                        .createQuery(
+                                "SELECT u FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
+                                User.class);
+            } else {
+                typedQuery = entityManager
+                        .createQuery(
+                                "SELECT c FROM Client c ",
+                                User.class);
+            }
 
 			typedQuery.setFirstResult(startIndex);
 			typedQuery.setMaxResults(ITEMS_PER_PAGE);
@@ -98,29 +108,30 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public List<User> getAllClients(int pageNumber) {
-		int startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
-
+	public int getTotalPageNumber(int accessLevel){
 		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
-		List<User> users = null;
+        try {
+            TypedQuery<Long> countQuery;
+            if (accessLevel == 1) {
+                countQuery = entityManager
+                        .createQuery(
+                                "SELECT COUNT(u) FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
+                                Long.class);
+            } else {
+                countQuery = entityManager
+                        .createQuery(
+                                "SELECT COUNT(c) FROM Client c ",
+                                Long.class);
+            }
 
-		try {
-			TypedQuery<User> typedQuery;
+            long totalUsers = countQuery.getSingleResult();
+            int totalPages = (int) Math.ceil((double) totalUsers / ITEMS_PER_PAGE);
 
-			typedQuery = entityManager.createQuery("SELECT c FROM Client c", User.class);
+            return totalPages == 0 ? 1 : totalPages;
 
-			typedQuery.setFirstResult(startIndex);
-			typedQuery.setMaxResults(ITEMS_PER_PAGE);
-
-			users = typedQuery.getResultList();
-
-		} catch (Exception e) {
-			logger.error("Error listing users: ", e);
-		} finally {
-			entityManager.close();
-		}
-
-		return users;
+        } finally {
+            entityManager.close();
+        }
 	}
 
 	@Override
