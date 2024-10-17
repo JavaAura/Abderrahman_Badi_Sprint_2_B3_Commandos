@@ -70,6 +70,8 @@ public class UserServlet extends HttpServlet {
 
 		context.setVariable("user", loggedInUser);
 		context.setVariable("users", users);
+		context.setVariable("totalPages", totalPages);
+		context.setVariable("pageNumber", page);
 
 		// Set content type for the response
 		response.setContentType("text/html;charset=UTF-8");

@@ -2,44 +2,52 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{dashboard_layout}">
 
 <body>
-  <section layout:fragment="content">
+  <section layout:fragment="content" class="flex flex-col items-center justify-between pt-8 w-11/12 mx-auto min-h-[80vh]">
+
+    <div class="flex items-center justify-between w-full">
+      <h1 class="text-4xl">Users</h1>
+      <button
+        class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        type="button">
+        Add author
+      </button>
+    </div>
+
     <!-- Table to display authors -->
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full h-full">
       <table class="min-w-full bg-white border border-gray-300 mx-auto">
         <thead>
           <tr class="bg-gray-200 text-gray-700 ">
             <th class="py-3 px-4 border-b">First Name</th>
             <th class="py-3 px-4 border-b">Last Name</th>
             <th class="py-3 px-4 border-b">Email</th>
+            <th class="py-3 px-4 border-b">Role</th>
             <th class="py-3 px-4 border-b">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <c:forEach var="author" items="${authors}">
-            <tr class="hover:bg-gray-100 text-center">
-              <td class="py-3 px-4 border-b">${author.firstName}</td>
-              <td class="py-3 px-4 border-b">${author.lastName}</td>
-              <td class="py-3 px-4 border-b">${author.email}</td>
-              <td class="py-3 px-4 border-b flex items-center justify-center space-x-2">
-                <!-- Update button triggers modal with data -->
-                <button data-modal-target="update-author-modal" data-modal-toggle="update-author-modal"
-                  data-id="${author.id}" data-firstname="${author.firstName}" data-lastname="${author.lastName}"
-                  data-email="${author.email}" data-role="${author.role}" data-birthdate="${author.birthDay}"
-                  class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200">
-                  Update
+          <tr th:each="user : ${users}" class="hover:bg-gray-100 text-center">
+            <td class="py-3 px-4 border-b" th:text="${user.firstName}">FirstName</td>
+            <td class="py-3 px-4 border-b" th:text="${user.lastName}">LastName</td>
+            <td class="py-3 px-4 border-b" th:text="${user.email}">Email</td>
+            <td class="py-3 px-4 border-b" th:text="${user.role}">Role</td>
+            <td class="py-3 px-4 border-b flex items-center justify-center space-x-2">
+              <!-- Update button triggers modal with data -->
+              <button class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200">
+                Update
+              </button>
+
+              <form action="" method="post">
+                <input type="hidden" name="id" th:value="${user.id}" />
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition duration-200">
+                  Delete
                 </button>
-
-
-                <form action="" method="post">
-                  <input type="hidden" name="id" value="${author.id}" />
-                  <input type="hidden" name="action" value="delete">
-                  <button type="submit"
-                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition duration-200">Delete</button>
-                </form>
-              </td>
-            </tr>
-          </c:forEach>
+              </form>
+            </td>
+          </tr>
         </tbody>
+
       </table>
     </div>
 
