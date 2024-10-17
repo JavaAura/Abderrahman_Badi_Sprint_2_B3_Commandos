@@ -16,7 +16,7 @@ public class ThymeleafUtil {
             ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
             templateResolver.setPrefix("/WEB-INF/templates/"); // Path to your templates folder
             templateResolver.setSuffix(".html");
-            templateResolver.setTemplateMode("HTML5");
+            templateResolver.setTemplateMode("HTML");
             templateResolver.setCacheable(false);
 
             templateEngine = new TemplateEngine();
