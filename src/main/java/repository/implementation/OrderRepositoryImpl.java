@@ -1,6 +1,7 @@
 package repository.implementation;
 
 import model.Order;
+import model.Product;
 import repository.interfaces.OrderRepository;
 
 import javax.persistence.EntityManager;
@@ -15,13 +16,11 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<Order> getByClient(Long clientId, int page, int size, String searchQuery) {
-
         String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId AND " +
                 "(o.orderStatut LIKE :searchQuery OR o.id LIKE :searchQuery)";
         TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
         query.setParameter("clientId", clientId);
         query.setParameter("searchQuery", "%" + searchQuery + "%");
-
 
         query.setFirstResult(page * size);
         query.setMaxResults(size);
@@ -38,6 +37,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
         return query.getResultList();
     }
+
 
 
     @Override
@@ -72,7 +72,6 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public boolean canModify(Order order) {
-
         return order.getOrderStatut().equals("En attente") || order.getOrderStatut().equals("En traitement");
     }
 }
