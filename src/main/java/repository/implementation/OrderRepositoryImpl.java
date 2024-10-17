@@ -29,19 +29,18 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> getdAll(int page, int size) {
-        String queryStr = "SELECT o FROM Order o WHERE o.orderStatut = 'En attente' OR o.orderStatut = 'En traitement'";
+    public List<Order> getAll(int page, int size) {
+        String queryStr = "SELECT o FROM Order o ";
         TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
         query.setFirstResult(page * size);
         query.setMaxResults(size);
-
         return query.getResultList();
     }
 
 
 
     @Override
-    public Order create(Order order) {
+    public Order save(Order order) {
         entityManager.persist(order);
         return order;
     }
@@ -57,7 +56,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public void delete(Long orderId) {
-        Order order = getById(orderId);
+        Order order = get(orderId);
         if (order != null && canModify(order)) {
             entityManager.remove(order);
         } else {
@@ -66,7 +65,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order getById(Long orderId) {
+    public Order get(Long orderId) {
         return entityManager.find(Order.class, orderId);
     }
 

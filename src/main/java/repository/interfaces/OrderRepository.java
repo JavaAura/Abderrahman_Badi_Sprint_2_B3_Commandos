@@ -8,15 +8,15 @@ public interface OrderRepository {
 
     List<Order> getByClient(Long clientId, int page, int size, String searchQuery);
 
-    List<Order> getdAll(int page, int size);
+    List<Order> getAll(int page, int size);
 
-    Order create(Order order);
+    Order save(Order order);
 
     Order update(Order order) ;
 
     void delete(Long orderId);
 
-    Order getById(Long orderId);
+    Order get(Long orderId);
 
     boolean canModify(Order order);
 }
