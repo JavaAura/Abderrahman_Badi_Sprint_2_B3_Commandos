@@ -3,6 +3,8 @@ package util;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
+import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
+
 import javax.servlet.ServletContext;
 
 public class ThymeleafUtil {
@@ -15,12 +17,12 @@ public class ThymeleafUtil {
             templateResolver.setPrefix("/WEB-INF/templates/"); // Path to your templates folder
             templateResolver.setSuffix(".html");
             templateResolver.setTemplateMode("HTML5");
-            templateResolver.setCacheable(false); 
-         
+            templateResolver.setCacheable(false);
 
             templateEngine = new TemplateEngine();
+            templateEngine.addDialect(new LayoutDialect());
             templateEngine.setTemplateResolver(templateResolver);
-          
+
         }
         return templateEngine;
     }
