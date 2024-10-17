@@ -31,12 +31,14 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<Order> getdAll(int page, int size) {
-        TypedQuery<Order> query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
+        String queryStr = "SELECT o FROM Order o WHERE o.orderStatut = 'En attente' OR o.orderStatut = 'En traitement'";
+        TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
         query.setFirstResult(page * size);
         query.setMaxResults(size);
 
         return query.getResultList();
     }
+
 
     @Override
     public Order create(Order order) {
@@ -46,14 +48,20 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public Order update(Order order) {
-        return entityManager.merge(order);
+        if (canModify(order)) {
+            return entityManager.merge(order);
+        } else {
+            throw new IllegalStateException("Cannot modify an order that has been shipped or beyond.");
+        }
     }
 
     @Override
     public void delete(Long orderId) {
         Order order = getById(orderId);
-        if (order != null) {
+        if (order != null && canModify(order)) {
             entityManager.remove(order);
+        } else {
+            throw new IllegalStateException("Cannot delete an order that has been shipped or beyond.");
         }
     }
 
@@ -65,6 +73,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public boolean canModify(Order order) {
 
-        return false;
+        return order.getOrderStatut().equals("En attente") || order.getOrderStatut().equals("En traitement");
     }
 }
