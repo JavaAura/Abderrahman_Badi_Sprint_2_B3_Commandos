@@ -1,10 +1,13 @@
 function openPopup() {
   document.getElementById("popup").classList.remove("hidden");
-   console.log('test')
 }
 
 function closePopup() {
   document.getElementById("popup").classList.add("hidden");
 }
 
-console.log('js file working')
+function toggleMenu() {
+  document.getElementById("menu").classList.toggle("hidden");
+  document.getElementById("arrow_icon").classList.toggle("rotate-180")
+}
+

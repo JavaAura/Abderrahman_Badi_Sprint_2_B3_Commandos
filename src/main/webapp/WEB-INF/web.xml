@@ -23,7 +23,6 @@
     <servlet-name>HomeServlet</servlet-name>
     <servlet-class>controller.HomeServlet</servlet-class>
   </servlet>
-
   <servlet-mapping>
     <servlet-name>HomeServlet</servlet-name>
     <url-pattern>/home</url-pattern> <!-- Mapping for HomeServlet -->
@@ -33,12 +32,12 @@
     <servlet-name>LoginServlet</servlet-name>
     <servlet-class>controller.auth.LoginServlet</servlet-class>
   </servlet>
-
   <servlet-mapping>
     <servlet-name>LoginServlet</servlet-name>
     <url-pattern>/login</url-pattern>
   </servlet-mapping>
   <listener>
+
     <listener-class>listener.JpaInitializer</listener-class>
   </listener>
 
