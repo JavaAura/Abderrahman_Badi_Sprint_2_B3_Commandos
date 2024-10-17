@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -76,6 +77,18 @@ public class UserRepositoryImplTest {
         entityManager.persist(superAdmin);
         entityManager.persist(admin);
 
+        transaction.commit();
+        entityManager.close();
+    }
+    
+    @After
+    public void tearDown() {
+    	entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+
+        entityManager.createQuery("DELETE FROM User").executeUpdate();
+        
         transaction.commit();
         entityManager.close();
     }
