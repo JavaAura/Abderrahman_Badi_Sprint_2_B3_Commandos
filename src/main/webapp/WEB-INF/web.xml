@@ -20,6 +20,15 @@
   </servlet-mapping>
 
   <servlet>
+    <servlet-name>UserServlet</servlet-name>
+    <servlet-class>controller.UserServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UserServlet</servlet-name>
+    <url-pattern>/dashboard/users</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
     <servlet-name>HomeServlet</servlet-name>
     <servlet-class>controller.HomeServlet</servlet-class>
   </servlet>
