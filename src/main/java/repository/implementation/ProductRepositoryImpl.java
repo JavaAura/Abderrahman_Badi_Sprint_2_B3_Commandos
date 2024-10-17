@@ -21,7 +21,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 	private static final int ITEMS_PER_PAGE = 5 ;
 	private static final String LIST = "SELECT p FROM Product p";
 	private static final String GET = "SELECT p FROM Product p WHERE p.id = :id";
-	private static final String SEARCH = "SELECT DISTINCT P FROM Product p  WHERE p.name LIKE :name";
+	private static final String SEARCH = "SELECT DISTINCT p FROM Product p  WHERE p.name LIKE :name";
 
 	@Override
 	public List<Product> getAll(int pageNumber) {
