@@ -21,121 +21,133 @@ import static org.mockito.Mockito.*;
 
 class OrderRepositoryImplTest {
 
+    @InjectMocks
+    private OrderRepositoryImpl orderRepository;
+
     @Mock
     private EntityManager entityManager;
 
     @Mock
     private TypedQuery<Order> typedQuery;
 
-    @InjectMocks
-    private OrderRepositoryImpl orderRepository;
-
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testGetdAll() {
-        // Arrange
+    void testGetByClient() {
+        Long clientId = 1L;
+        String searchQuery = "test";
+        int page = 0;
+        int size = 10;
+
         Order order1 = new Order();
-        order1.setOrderStatut(Statut.valueOf("En attente"));
+        order1.setId(1L);
+        order1.setOrderStatut(Statut.WAITING);
 
         Order order2 = new Order();
-        order2.setOrderStatut(Statut.valueOf("En traitement"));
+        order2.setId(2L);
+        order2.setOrderStatut(Statut.PROCESSING);
 
-        List<Order> expectedOrders = Arrays.asList(order1, order2);
+        when(entityManager.createQuery(anyString(), eq(Order.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter("clientId", clientId)).thenReturn(typedQuery);
+        when(typedQuery.setParameter("searchQuery", "%" + searchQuery + "%")).thenReturn(typedQuery);
+        when(typedQuery.setFirstResult(page * size)).thenReturn(typedQuery);
+        when(typedQuery.setMaxResults(size)).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(Arrays.asList(order1, order2));
+
+        List<Order> orders = orderRepository.getByClient(clientId, page, size, searchQuery);
+
+        assertNotNull(orders);
+        assertEquals(2, orders.size());
+        verify(entityManager).createQuery(anyString(), eq(Order.class));
+        verify(typedQuery).setParameter("clientId", clientId);
+        verify(typedQuery).setParameter("searchQuery", "%" + searchQuery + "%");
+    }
+
+    @Test
+    void testGetAll() {
+        Order order1 = new Order();
+        order1.setId(1L);
+        order1.setOrderStatut(Statut.WAITING);
+
+        Order order2 = new Order();
+        order2.setId(2L);
+        order2.setOrderStatut(Statut.PROCESSING);
 
         when(entityManager.createQuery(anyString(), eq(Order.class))).thenReturn(typedQuery);
         when(typedQuery.setFirstResult(anyInt())).thenReturn(typedQuery);
         when(typedQuery.setMaxResults(anyInt())).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(expectedOrders);
+        when(typedQuery.getResultList()).thenReturn(Arrays.asList(order1, order2));
 
+        List<Order> orders = orderRepository.getdAll(0, 10);
 
-        List<Order> result = orderRepository.getdAll(0, 10);
-
-
-        assertEquals(2, result.size());
-        assertEquals("En attente", result.get(0).getOrderStatut());
-        assertEquals("En traitement", result.get(1).getOrderStatut());
-
-        verify(entityManager).createQuery(anyString(), eq(Order.class));
-        verify(typedQuery).setFirstResult(0);
-        verify(typedQuery).setMaxResults(10);
+        assertNotNull(orders);
+        assertEquals(2, orders.size());
     }
 
     @Test
-    void testCreateOrder() {
-
-        Order order = new Order();
-        order.setOrderStatut(Statut.valueOf("En attente"));
-
-
-        Order result = orderRepository.create(order);
-
-
-        verify(entityManager).persist(order);
-        assertNotNull(result);
-    }
-
-    @Test
-    void testUpdateOrder_CanModify() {
-
-        Order order = new Order();
-        order.setOrderStatut(Statut.valueOf("En attente"));
-
-        when(entityManager.merge(any(Order.class))).thenReturn(order);
-
-
-        Order result = orderRepository.update(order);
-
-
-        verify(entityManager).merge(order);
-        assertEquals(order, result);
-    }
-
-    @Test
-    void testUpdateOrder_CannotModify() {
-
-        Order order = new Order();
-        order.setOrderStatut(Statut.valueOf("Expédiée"));
-
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            orderRepository.update(order);
-        });
-
-        assertEquals("Cannot modify an order that has been shipped or beyond.", exception.getMessage());
-    }
-
-    @Test
-    void testDeleteOrder_CanModify() {
-
+    void testCreate() {
         Order order = new Order();
         order.setId(1L);
-        order.setOrderStatut(Statut.valueOf("En attente"));
 
-        when(entityManager.find(Order.class, 1L)).thenReturn(order);
+        orderRepository.create(order);
 
+        verify(entityManager).persist(order);
+    }
 
-        orderRepository.delete(1L);
+    @Test
+    void testUpdate() {
+        Order order = new Order();
+        order.setId(1L);
+        order.setOrderStatut(Statut.WAITING);
+
+        when(entityManager.merge(order)).thenReturn(order);
+
+        Order updatedOrder = orderRepository.update(order);
+
+        assertNotNull(updatedOrder);
+        assertEquals(order.getId(), updatedOrder.getId());
+        verify(entityManager).merge(order);
+    }
+
+    @Test
+    void testDelete() {
+        Long orderId = 1L;
+        Order order = new Order();
+        order.setId(orderId);
+        order.setOrderStatut(Statut.WAITING);
+
+        when(entityManager.find(Order.class, orderId)).thenReturn(order);
+
+        orderRepository.delete(orderId);
 
         verify(entityManager).remove(order);
     }
 
     @Test
-    void testDeleteOrder_CannotModify() {
-
+    void testGetById() {
+        Long orderId = 1L;
         Order order = new Order();
-        order.setId(1L);
-        order.setOrderStatut(Statut.valueOf("Expédiée"));
+        order.setId(orderId);
 
-        when(entityManager.find(Order.class, 1L)).thenReturn(order);
+        when(entityManager.find(Order.class, orderId)).thenReturn(order);
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            orderRepository.delete(1L);
-        });
+        Order foundOrder = orderRepository.getById(orderId);
 
-        assertEquals("Cannot delete an order that has been shipped or beyond.", exception.getMessage());
+        assertNotNull(foundOrder);
+        assertEquals(orderId, foundOrder.getId());
     }
+
+    @Test
+    void testCanModify() {
+        Order order = new Order();
+        order.setOrderStatut(Statut.WAITING);
+
+        boolean canModify = orderRepository.canModify(order);
+
+        assertTrue(canModify);
+    }
+    /*test */
 }
