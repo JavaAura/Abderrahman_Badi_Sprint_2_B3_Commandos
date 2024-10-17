@@ -36,6 +36,19 @@
     <servlet-name>LoginServlet</servlet-name>
     <url-pattern>/login</url-pattern>
   </servlet-mapping>
+
+
+  <servlet>
+    <servlet-name>OrderServlet</servlet-name>
+    <servlet-class>controller.OrderServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>OrderServlet</servlet-name>
+    <url-pattern>/dashboard/order</url-pattern>
+  </servlet-mapping>
+
+
+
   <listener>
 
     <listener-class>listener.JpaInitializer</listener-class>
