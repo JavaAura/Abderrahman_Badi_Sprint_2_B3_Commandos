@@ -25,19 +25,25 @@ public class ProductServlet extends HttpServlet {
 	private final ProductService productService = new ProductService(productRepository);
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 
-		String action = request.getParameter("action");
+	    String action = request.getParameter("action");
+	    logger.info("Received action: {}", action); // Log the action
 
-		if ("list".equals(action)) {
-			getAllProducts(request, response);
-		} else if ("get".equals(action)) {
-			getProduct(request, response);
-		} else {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
-		}
-
+	    if ("list".equals(action)) {
+	        try {
+	            int pageNumber = Integer.parseInt(request.getParameter("page"));
+	            List<Product> products = productService.getAllProducts(pageNumber);
+	            request.setAttribute("products", products);
+	            request.getRequestDispatcher("/WEB-INF/templates/view/dashboard/products.html").forward(request, response);
+	        } catch (NumberFormatException e) {
+	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid page number.");
+	        }
+	    } else {
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
+	    }
 	}
+
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -59,37 +65,16 @@ public class ProductServlet extends HttpServlet {
 
 	}
 
+ 
 
-	private void getProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		Long id = Long.parseLong(request.getParameter("id"));
-		Optional<Product> product = productService.getProduct(id);
-		
-		if(product.isPresent()) {
-			request.setAttribute("product", product);
-			request.getRequestDispatcher("/productDetails.html").forward(request, response);
-		}else {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Product not found");
-		}
-
-	}
-
-	private void getAllProducts(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		
-		int pageNumber = Integer.parseInt(request.getParameter("id"));
-		List<Product> products = productService.getAllProducts(pageNumber);
-		request.setAttribute("products", products);
-		request.getRequestDispatcher("/products.html").forward(request, response);
-
-	}
+ 
 	
 	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String name = request.getParameter("name");
 		List<Product> products = productService.searchProduct(name);
 		request.setAttribute("products", products);
-		request.getRequestDispatcher("/products.html").forward(request, response);
+ 		request.getRequestDispatcher("/WEB-INF/templates/view/dashboard/products.html").forward(request, response);
 
 	}
 
@@ -115,7 +100,7 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.updateProduct(product);
-		response.sendRedirect("products?action=list&page=1");
+		response.sendRedirect("/products?action=list&page=1");
 
 	}
 
@@ -135,14 +120,14 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.addProduct(product);
-		response.sendRedirect("products?action=list&page=1");
+		response.sendRedirect("/products?action=list&page=1");
 	}
 
 	private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		Long id = Long.parseLong(request.getParameter("id"));
 		productService.deleteProduct(id);
-		response.sendRedirect("products?action=list&page=1");
+		response.sendRedirect("/products?action=list&page=1");
 		
 		
 	}

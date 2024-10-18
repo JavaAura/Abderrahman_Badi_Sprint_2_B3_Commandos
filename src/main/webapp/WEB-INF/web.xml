@@ -18,6 +18,16 @@
     <servlet-name>DashboardServlet</servlet-name>
     <url-pattern>/dashboard</url-pattern>
   </servlet-mapping>
+  
+ <servlet>
+    <servlet-name>ProductServlet</servlet-name>
+    <servlet-class>controller.ProductServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>ProductServlet</servlet-name>
+    <url-pattern>/products</url-pattern>
+</servlet-mapping>
+
 
   <servlet>
     <servlet-name>HomeServlet</servlet-name>
