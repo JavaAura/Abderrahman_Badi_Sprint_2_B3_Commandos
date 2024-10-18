@@ -44,7 +44,15 @@ public class UserServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 
+		User loggedInUser = (User) session.getAttribute("user");
+
+		if (loggedInUser == null) {
+			response.sendRedirect("/Commandos");
+			return;
+		}
+
 		String message = (String) session.getAttribute("message");
+		@SuppressWarnings("unchecked")
 		List<String> errorMessages = (List<String>) session.getAttribute("errorMessages");
 
 		if (message != null) {
@@ -56,18 +64,10 @@ public class UserServlet extends HttpServlet {
 			session.removeAttribute("errorMessages");
 		}
 
-		Admin loggedUser = new Admin();
-		loggedUser.setFirstName("admin");
-		loggedUser.setEmail("admin@youcode.ma");
-		loggedUser.setRole(Role.ADMIN);
-		loggedUser.setLevelAccess(1);
-
-		session.setAttribute("user", loggedUser);
-
-		User loggedInUser = (User) session.getAttribute("user");
-
 		if (loggedInUser.getRole() == Role.CLIENT)
 			templateEngine.process("views/index", context, response.getWriter());
+
+		Admin loggedUser = (Admin) loggedInUser;
 
 		int page = 1; // default page is 1
 		String pageParam = request.getParameter("page");
@@ -84,7 +84,7 @@ public class UserServlet extends HttpServlet {
 		List<User> users = userService.getAllUsers(page, loggedUser.getLevelAccess());
 		int totalPages = userService.getTotalPageNumber(loggedUser.getLevelAccess());
 
-		context.setVariable("user", loggedInUser);
+		context.setVariable("user", loggedUser);
 		context.setVariable("users", users);
 		context.setVariable("totalPages", totalPages);
 		context.setVariable("pageNumber", page);
@@ -114,17 +114,17 @@ public class UserServlet extends HttpServlet {
 					long userId = Long.parseLong(request.getParameter("user_id"));
 					try {
 						User user = userService.getUser(userId).orElse(null);
-						if(user != null){
-							String jsonResponse  = convertUserToJson(user);
+						if (user != null) {
+							String jsonResponse = convertUserToJson(user);
 
 							response.setStatus(HttpServletResponse.SC_OK);
 							response.setContentType("application/json");
 							response.getWriter().write(jsonResponse);
-						}else{
+						} else {
 							response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 							response.getWriter().write("{\"error\": \"User not found\"}");
 						}
-					
+
 					} catch (Exception e) {
 						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 						response.setContentType("application/json");
@@ -178,7 +178,7 @@ public class UserServlet extends HttpServlet {
 				if (errors.isEmpty()) {
 					client.setPassword(BCrypt.withDefaults().hashToString(12, client.getPassword().toCharArray()));
 					userService.addUser(client);
-					session.setAttribute("message", "Author added successfully!");
+					session.setAttribute("message", "User added successfully!");
 				} else {
 					session.setAttribute("errorMessages", errors);
 				}
@@ -191,7 +191,56 @@ public class UserServlet extends HttpServlet {
 	}
 
 	protected void updateUser(HttpServletRequest request, HttpServletResponse response) {
+		List<String> errors = new ArrayList<>();
+		HttpSession session = request.getSession();
+		long userId = 0;
+		User user;
+		Client client = new Client();
+		try {
+			userId = Long.parseLong(request.getParameter("userId"));
+		} catch (Exception e) {
+			errors.add("Error parsing user id");
+			session.setAttribute("errorMessages", errors);
+			return;
+		}
 
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		String email = request.getParameter("email");
+		String password = request.getParameter("password");
+
+		user = userService.getUser(userId).orElse(null);
+
+		if (user == null) {
+			errors.add("Couldn't find user");
+			session.setAttribute("errorMessages", errors);
+			return;
+		}
+
+		user.setEmail(email);
+		user.setFirstName(firstName);
+		user.setLastName(lastName);
+		if (password != null && !password.trim().isEmpty()) {
+			user.setPassword(BCrypt.withDefaults().hashToString(12, password.toCharArray()));
+		}
+
+		if (user.getRole() == Role.CLIENT) {
+			String addressDelivery = request.getParameter("addressDelivery");
+			String paymentMethod = request.getParameter("paymentMethod");
+			client = (Client) user;
+			client.setAddressDelivery(addressDelivery);
+			client.setPaymentMethod(paymentMethod);
+		}
+
+		errors.addAll(Validator.validateUser(user.getRole() == Role.CLIENT ? client : user));
+		logger.info("Validator errors : " + errors);
+
+		if (errors.isEmpty()) {
+			userService.updateUser(user.getRole() == Role.CLIENT ? client : user);
+			session.setAttribute("message", "User updated successfully!");
+		} else {
+			session.setAttribute("errorMessages", errors);
+		}
 	}
 
 	protected void deleteUser(HttpServletRequest request, HttpServletResponse response) {
@@ -208,17 +257,17 @@ public class UserServlet extends HttpServlet {
 		json.append("\"lastName\":\"").append(user.getLastName()).append("\",");
 		json.append("\"email\":\"").append(user.getEmail()).append("\",");
 		json.append("\"role\":\"").append(user.getRole().name()).append("\"");
-		
+
 		if (user instanceof Admin) {
 			Admin admin = (Admin) user;
 			json.append(",\"levelAccess\":\"").append(admin.getLevelAccess()).append("\"");
 		}
-		if(user instanceof Client){
+		if (user instanceof Client) {
 			Client client = (Client) user;
 			json.append(",\"addressDelivery\":\"").append(client.getAddressDelivery()).append("\"");
 			json.append(",\"paymentMethod\":\"").append(client.getPaymentMethod()).append("\"");
 		}
-		
+
 		json.append("}");
 		return json.toString();
 	}

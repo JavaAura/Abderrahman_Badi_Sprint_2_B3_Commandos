@@ -27,42 +27,38 @@
           <!-- Modal body -->
           <div class="p-4 md:p-5 w-full">
             <form class="space-y-4 text-gray-800" action="" method="post">
-              <input type="hidden" id="action" name="action" >
+              <input type="hidden" id="action" name="action">
+              <input type="hidden" id="userId" name="userId">
               <div class="flex flex-col items-start">
-                <label for="email" class="mb-2 text-sm font-medium">First Name</label>
+                <label for="firstName" class="mb-2 text-sm font-medium">First Name</label>
                 <input type="text" name="firstName" id="firstName"
                   class="bg-gray-50 border border-blue-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
                   required />
               </div>
               <div class="flex flex-col items-start">
-                <label for="email" class="mb-2 text-sm font-medium">Last Name</label>
+                <label for="lastName" class="mb-2 text-sm font-medium">Last Name</label>
                 <input type="text" name="lastName" id="lastName"
                   class="bg-gray-50 border border-blue-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
                   required />
               </div>
               <div class="flex flex-col items-start">
                 <label for="email" class="mb-2 text-sm font-medium">Email</label>
-                <input type="email" name="email" id="email"
+                <input type="email" name="email" id="user_email"
                   class="bg-gray-50 border border-blue-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
-                  placeholder="name@company.com" required />
-              </div>
-              <div class="flex flex-col items-start">
-                <label for="password" class="mb-2 text-sm font-medium">Password</label>
-                <input type="password" name="password" id="password" placeholder="••••••••" autocomplete="current-password"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
                   required />
               </div>
-              <div class="flex flex-col items-start">
-                <label for="password" class="mb-2 text-sm font-medium">Role</label>
-                <select onchange="showFields(event)" name="role" id="role"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg">
-                  <option value="" selected disabled hidden>Select role...</option>
-                  <option value="CLIENT">Client</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
+
+              <div id="password_field" class="flex flex-col items-start">
+                <label for="password" class="mb-2 text-sm font-medium">Password</label>
+                <input type="password" name="password" id="user_password" placeholder="••••••••" autocomplete="current-password"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
+                  />
               </div>
 
-              <div id="fields">
+              <div id="role_field" class="flex flex-col items-start">
+              </div>
+
+              <div id="fields" class="flex flex-col items-start gap-4">
               </div>
 
               <button type="submit"
@@ -106,7 +102,8 @@
             <td class="py-3 px-4 border-b" th:text="${user.role}">Role</td>
             <td class="py-3 px-4 border-b flex items-center justify-center space-x-2">
 
-              <button onclick="openModal(event, 'update')" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200 block">
+              <button onclick="openModal(event, 'update')"
+                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200 block">
                 Update
               </button>
 

@@ -166,7 +166,7 @@ public class UserRepositoryImpl implements UserRepository {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
-			logger.error("Error creating user: ", e);
+			logger.error("Error updating user: ", e);
 		} finally {
 			entityManager.close();
 		}
