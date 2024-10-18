@@ -90,28 +90,28 @@ public class UserServiceTest {
 
     @Test
     public void getAllUsersTest() {
-        when(userRepository.getAll(1)).thenReturn(userList);
+        when(userRepository.getAll(1, 1)).thenReturn(userList);
 
-        List<User> result = userService.getAllUsers(1);
+        List<User> result = userService.getAllUsers(1, 1);
 
         assertEquals(2, result.size());
         assertEquals("client1@youcode.ma", result.get(0).getEmail());
         assertEquals("client2@youcode.ma", result.get(1).getEmail());
 
-        verify(userRepository).getAll(1);
+        verify(userRepository).getAll(1, 1);
     }
 
     @Test
     public void getAllClientsTest() {
-        when(userRepository.getAll(1)).thenReturn(userList);
+        when(userRepository.getAll(1, 1)).thenReturn(userList);
 
-        List<User> result = userService.getAllUsers(1);
+        List<User> result = userService.getAllUsers(1, 1);
 
         assertEquals(2, result.size());
         assertEquals("client1@youcode.ma", result.get(0).getEmail());
         assertEquals("client2@youcode.ma", result.get(1).getEmail());
 
-        verify(userRepository).getAll(1);
+        verify(userRepository).getAll(1, 1);
     }
 
     @Test

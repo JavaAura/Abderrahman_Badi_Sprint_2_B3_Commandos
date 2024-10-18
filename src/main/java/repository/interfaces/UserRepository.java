@@ -9,9 +9,9 @@ public interface UserRepository {
 
 	Optional<User> get(long id);
 
-	List<User> getAll(int pageNumber);
+	List<User> getAll(int pageNumber, int accessLevel);
 
-	List<User> getAllClients(int pageNumber);
+	int getTotalPageNumber(int accessLevel);
 
 	void save(User user);
 
