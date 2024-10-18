@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
+import model.Admin;
 import model.Product;
 import model.User;
 import model.enums.Role;
@@ -32,50 +33,64 @@ public class ProductServlet extends HttpServlet {
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
 
-	 @Override
-	    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-	            throws ServletException, IOException {
-	        TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
-	        ServletContext servletContext = request.getServletContext();
-	        WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+	    ServletContext servletContext = request.getServletContext();
+	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
-	        HttpSession session = request.getSession();
-	        User loggedInUser = (User) session.getAttribute("user");
+	    HttpSession session = request.getSession();
+	    
+	    // Hardcoded admin user for testing
+	    Admin user = new Admin();
+	    user.setFirstName("admin");
+	    user.setEmail("admin@youcode.ma");
+	    user.setRole(Role.ADMIN);
+	    user.setLevelAccess(1);
+	    
+	    // Set the test user in the session
+	    session.setAttribute("user", user);
+	    
+	    // Retrieve the logged-in user from the session
+	    User loggedInUser = (User) session.getAttribute("user");
 
-	        // Ensure user session exists and has the correct role
-	        if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
-	            response.sendRedirect("/login");  // Redirect if not logged in or not an admin
-	            return;
-	        }
-
-	        // Pagination logic
-	        int page = 1; // default page is 1
-	        String pageParam = request.getParameter("page");
-	        if (pageParam != null) {
-	            try {
-	                page = Integer.parseInt(pageParam);
-	            } catch (NumberFormatException e) {
-	                logger.error("Error parsing pageParam: {}", pageParam, e);
-	            }
-	        }
-
-	        // Fetching products and total count
-	        List<Product> products = productService.getAllProducts(page, PAGE_SIZE); // Use PAGE_SIZE here
-	        long totalProductCount = productService.getTotalProductCount(); // Total count of products
-	        int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE); // Calculate total pages
-
-	        // Add variables to Thymeleaf context
-	        context.setVariable("user", loggedInUser);
-	        context.setVariable("products", products);
-	        context.setVariable("totalPages", totalPages); // Correctly calculated total pages
-	        context.setVariable("pageNumber", page);
-
-	        // Set content type for the response
-	        response.setContentType("text/html;charset=UTF-8");
-
-	        // Render the Thymeleaf template for products page
-	        templateEngine.process("views/dashboard/products", context, response.getWriter());
+	    // Ensure user session exists and has the correct role
+	    if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
+	        logger.warn("Unauthorized access attempt by user: {}", (loggedInUser != null ? loggedInUser.getEmail() : "unknown"));
+	        response.sendRedirect("/login");  // Redirect if not logged in or not an admin
+	        return;
 	    }
+
+	    // Pagination logic
+	    int page = 1; // Default page is 1
+	    String pageParam = request.getParameter("page");
+	    if (pageParam != null) {
+	        try {
+	            page = Integer.parseInt(pageParam);
+	        } catch (NumberFormatException e) {
+	            logger.error("Error parsing pageParam: {}", pageParam, e);
+	        }
+	    }
+
+	    // Fetching products and total count
+	    List<Product> products = productService.getAllProducts(page, PAGE_SIZE); // Use PAGE_SIZE here
+	    long totalProductCount = productService.getTotalProductCount(); // Total count of products
+	    int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE); // Calculate total pages
+
+	    // Add variables to Thymeleaf context
+	    context.setVariable("user", loggedInUser);
+	    context.setVariable("products", products);
+	    context.setVariable("totalPages", totalPages); // Correctly calculated total pages
+	    context.setVariable("pageNumber", page);
+
+	    // Set content type for the response
+	    response.setContentType("text/html;charset=UTF-8");
+
+	    // Render the Thymeleaf template for products page
+	    templateEngine.process("views/dashboard/products", context, response.getWriter());
+	}
+
 
 
 
@@ -104,12 +119,35 @@ public class ProductServlet extends HttpServlet {
  
 	
 	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		String name = request.getParameter("name");
-		List<Product> products = productService.searchProduct(name);
-		request.setAttribute("products", products);
- 		request.getRequestDispatcher("/WEB-INF/templates/view/dashboard/products.html").forward(request, response);
+	        throws ServletException, IOException {
+	    String name = request.getParameter("name");
+	    List<Product> products;
 
+	    if (name != null && !name.trim().isEmpty()) {
+	        // Search products by name
+	        products = productService.searchProduct(name);
+	    } else {
+	        // Fetch all products if no search query is provided
+	        products = productService.getAllProducts(1, PAGE_SIZE);
+	    }
+
+	    // Prepare the response
+	    request.setAttribute("products", products);
+	    request.setAttribute("pageNumber", 1); // Reset page number for search results
+	    request.setAttribute("totalPages", 1); // Adjust accordingly if you implement pagination for search results
+
+	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+	    ServletContext servletContext = request.getServletContext();
+	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+	    context.setVariable("products", products);
+	    context.setVariable("pageNumber", 1); // Update this if implementing pagination for search results
+	    context.setVariable("totalPages", 1); // Adjust if necessary
+	    context.setVariable("user", request.getSession().getAttribute("user"));
+
+	    // Render the Thymeleaf template for products page
+	    response.setContentType("text/html;charset=UTF-8");
+	    templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
 
 
