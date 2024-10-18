@@ -12,7 +12,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
 import model.User;
-import model.enums.Role;
 import util.ThymeleafUtil;
 
 import java.io.IOException;
@@ -27,13 +26,6 @@ public class DashboardServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 
-		User user = new User();
-		user.setFirstName("admin");
-		user.setEmail("admin@youcode.ma");
-		user.setRole(Role.ADMIN);
-
-		session.setAttribute("user", user);
-
 		User loggedInUser = (User) session.getAttribute("user");
 
 		// Prepare a Thymeleaf context if you need to pass any model data
@@ -43,6 +35,10 @@ public class DashboardServlet extends HttpServlet {
 
 		// Set content type for the response
 		response.setContentType("text/html;charset=UTF-8");
+
+		if(loggedInUser == null){
+			templateEngine.process("views/index", context, response.getWriter());
+		}
 
 		templateEngine.process("views/dashboard/index", context, response.getWriter());
 
