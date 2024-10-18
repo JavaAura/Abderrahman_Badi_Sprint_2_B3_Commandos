@@ -22,7 +22,6 @@ public class UserService {
 		return userRepository.getAll(pageNumber, accessLevel);
 	}
 
-
 	public int getTotalPageNumber(int accessLevel) {
 		return userRepository.getTotalPageNumber(accessLevel);
 	}

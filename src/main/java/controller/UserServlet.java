@@ -12,15 +12,19 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import model.Admin;
+import model.Client;
 import model.User;
 import model.enums.Role;
 import repository.implementation.UserRepositoryImpl;
 import repository.interfaces.UserRepository;
 import service.UserService;
 import util.ThymeleafUtil;
+import util.Validator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserServlet extends HttpServlet {
@@ -40,13 +44,25 @@ public class UserServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 
-		Admin user = new Admin();
-		user.setFirstName("admin");
-		user.setEmail("admin@youcode.ma");
-		user.setRole(Role.ADMIN);
-		user.setLevelAccess(1);
+		String message = (String) session.getAttribute("message");
+		List<String> errorMessages = (List<String>) session.getAttribute("errorMessages");
 
-		session.setAttribute("user", user);
+		if (message != null) {
+			context.setVariable("message", message);
+			session.removeAttribute("message");  // Clear after displaying
+		}
+		if (errorMessages != null) {
+			context.setVariable("errorMessages", errorMessages);
+			session.removeAttribute("errorMessages"); 
+		}
+
+		Admin loggedUser = new Admin();
+		loggedUser.setFirstName("admin");
+		loggedUser.setEmail("admin@youcode.ma");
+		loggedUser.setRole(Role.ADMIN);
+		loggedUser.setLevelAccess(1);	
+
+		session.setAttribute("user", loggedUser);
 
 		User loggedInUser = (User) session.getAttribute("user");
 
@@ -65,8 +81,8 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 
-		List<User> users = userService.getAllUsers(page, user.getLevelAccess());
-		int totalPages = userService.getTotalPageNumber(user.getLevelAccess());
+		List<User> users = userService.getAllUsers(page, loggedUser.getLevelAccess());
+		int totalPages = userService.getTotalPageNumber(loggedUser.getLevelAccess());
 
 		context.setVariable("user", loggedInUser);
 		context.setVariable("users", users);
@@ -81,7 +97,87 @@ public class UserServlet extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = request.getParameter("action");
+
+		if (action != null) {
+			switch (action) {
+				case "add":
+					addUser(request, response);
+					break;
+				case "delete":
+					deleteUser(request, response);
+					break;
+				case "update":
+					updateUser(request, response);
+					break;
+
+				default:
+					break;
+			}
+		}
+		response.sendRedirect("users");
+	}
+
+	protected void addUser(HttpServletRequest request, HttpServletResponse response) {
+		List<String> errors = new ArrayList<>();
+		HttpSession session = request.getSession();
+
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		String email = request.getParameter("email");
+		String password = request.getParameter("password");
+		Role role = Role.valueOf(request.getParameter("role"));
+
+		switch (role.toString()) {
+			case "ADMIN":
+				Admin admin = new Admin(firstName, lastName, email, password, role);
+				logger.info("Admin to insert : " + admin);
+
+				errors = Validator.validateUser(admin);
+				logger.info("Validator errors : " + errors);
+
+				if (errors.isEmpty()) {
+					admin.setPassword(BCrypt.withDefaults().hashToString(12, admin.getPassword().toCharArray()));
+					userService.addUser(admin);
+					session.setAttribute("message", "Author added successfully!");
+				} else {
+					session.setAttribute("errorMessages", errors);
+				}
+				break;
+
+			case "CLIENT":
+				String addressDelivery = request.getParameter("addressDelivery");
+				String paymentMethod = request.getParameter("paymentMethod");
+
+				Client client = new Client(firstName, lastName, email, password, role, addressDelivery, paymentMethod);
+				logger.info("Admin to insert : " + client);
+
+				errors = Validator.validateUser(client);
+				logger.info("Validator errors : " + errors);
+
+				if (errors.isEmpty()) {
+					client.setPassword(BCrypt.withDefaults().hashToString(12, client.getPassword().toCharArray()));
+					userService.addUser(client);
+					session.setAttribute("message", "Author added successfully!");
+				} else {
+					session.setAttribute("errorMessages", errors);
+				}
+				break;
+
+			default:
+				break;
+		}
 
 	}
 
+	protected void updateUser(HttpServletRequest request, HttpServletResponse response) {
+
+	}
+
+	protected void deleteUser(HttpServletRequest request, HttpServletResponse response) {
+		String authorIdString = request.getParameter("id");
+		long userId = Integer.parseInt(authorIdString);
+
+		userService.deleteUser(userId);
+	}
 }
