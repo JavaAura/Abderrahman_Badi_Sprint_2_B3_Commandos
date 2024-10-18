@@ -1,6 +1,17 @@
-function openModal(action) {
+function openModal(event, action) {
   document.getElementById("action").value = action;
   if (action === "update") {
+    let row = event.currentTarget.closest("tr");
+    let userIdTd = row.querySelector("td:first-child");
+    let userId = userIdTd.textContent.trim();
+
+    let host = window.location.hostname;
+    let port = window.location.port;
+    let urlPathname = "Commandos/dashboard/users";
+
+    let url = `${window.location.protocol}//${host}:${port}/${urlPathname}?user_id=${userId}`;
+
+    
   }
 
   document.getElementById("user_modal").classList.remove("hidden");
@@ -12,8 +23,6 @@ function closeModal() {
 
 function closeMessagePopup(event) {
   let message_container = event.currentTarget;
-  console.log(message_container);
-  
   message_container.classList.add("hidden");
 }
 
