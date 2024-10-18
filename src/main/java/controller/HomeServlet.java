@@ -26,12 +26,6 @@ public class HomeServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        User user = new User();
-        user.setFirstName("admin");
-        user.setEmail("admin@youcode.ma");
-
-        session.setAttribute("user", user);
-
         User loggedInUser = (User) session.getAttribute("user");
 
         // Prepare a Thymeleaf context if you need to pass any model data

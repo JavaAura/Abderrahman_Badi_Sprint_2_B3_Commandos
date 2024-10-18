@@ -14,9 +14,9 @@ public class ProductService {
 		this.productRepository = productRepository;
 	}
 
-	public List<Product> getAllProducts(int pageNumber) {
+	public List<Product> getAllProducts(int page , int pageSize) {
 
-		return productRepository.getAll(pageNumber);
+		return productRepository.getAll(page,pageSize);
 
 	}
 
@@ -41,6 +41,10 @@ public class ProductService {
 
 	public void deleteProduct(Long id) {
 		productRepository.delete(id);
+	}
+	
+	public long getTotalProductCount() {
+		return productRepository.getTotalProductCount();
 	}
 
 }
