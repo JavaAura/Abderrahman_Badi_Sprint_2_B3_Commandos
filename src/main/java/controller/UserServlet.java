@@ -49,18 +49,18 @@ public class UserServlet extends HttpServlet {
 
 		if (message != null) {
 			context.setVariable("message", message);
-			session.removeAttribute("message");  // Clear after displaying
+			session.removeAttribute("message"); // Clear after displaying
 		}
 		if (errorMessages != null) {
 			context.setVariable("errorMessages", errorMessages);
-			session.removeAttribute("errorMessages"); 
+			session.removeAttribute("errorMessages");
 		}
 
 		Admin loggedUser = new Admin();
 		loggedUser.setFirstName("admin");
 		loggedUser.setEmail("admin@youcode.ma");
 		loggedUser.setRole(Role.ADMIN);
-		loggedUser.setLevelAccess(1);	
+		loggedUser.setLevelAccess(1);
 
 		session.setAttribute("user", loggedUser);
 
@@ -110,7 +110,27 @@ public class UserServlet extends HttpServlet {
 				case "update":
 					updateUser(request, response);
 					break;
+				case "get":
+					long userId = Long.parseLong(request.getParameter("user_id"));
+					try {
+						User user = userService.getUser(userId).orElse(null);
+						if(user != null){
+							String jsonResponse  = convertUserToJson(user);
 
+							response.setStatus(HttpServletResponse.SC_OK);
+							response.setContentType("application/json");
+							response.getWriter().write(jsonResponse);
+						}else{
+							response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+							response.getWriter().write("{\"error\": \"User not found\"}");
+						}
+					
+					} catch (Exception e) {
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"error\"}");
+					}
+					return;
 				default:
 					break;
 			}
@@ -179,5 +199,27 @@ public class UserServlet extends HttpServlet {
 		long userId = Integer.parseInt(authorIdString);
 
 		userService.deleteUser(userId);
+	}
+
+	private String convertUserToJson(User user) {
+		StringBuilder json = new StringBuilder("{");
+		json.append("\"id\":").append(user.getId()).append(",");
+		json.append("\"firstName\":\"").append(user.getFirstName()).append("\",");
+		json.append("\"lastName\":\"").append(user.getLastName()).append("\",");
+		json.append("\"email\":\"").append(user.getEmail()).append("\",");
+		json.append("\"role\":\"").append(user.getRole().name()).append("\"");
+		
+		if (user instanceof Admin) {
+			Admin admin = (Admin) user;
+			json.append(",\"levelAccess\":\"").append(admin.getLevelAccess()).append("\"");
+		}
+		if(user instanceof Client){
+			Client client = (Client) user;
+			json.append(",\"addressDelivery\":\"").append(client.getAddressDelivery()).append("\"");
+			json.append(",\"paymentMethod\":\"").append(client.getPaymentMethod()).append("\"");
+		}
+		
+		json.append("}");
+		return json.toString();
 	}
 }

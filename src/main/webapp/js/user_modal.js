@@ -1,4 +1,4 @@
-function openModal(event, action) {
+async function openModal(event, action) {
   document.getElementById("action").value = action;
   if (action === "update") {
     let row = event.currentTarget.closest("tr");
@@ -9,8 +9,11 @@ function openModal(event, action) {
     let port = window.location.port;
     let urlPathname = "Commandos/dashboard/users";
 
-    let url = `${window.location.protocol}//${host}:${port}/${urlPathname}?user_id=${userId}`;
+    let url = `${window.location.protocol}//${host}:${port}/${urlPathname}?action=get&user_id=${userId}`;
 
+    const data = await getUser(url);
+
+    console.log(data);
     
   }
 
@@ -52,4 +55,19 @@ function showFields(event) {
       document.getElementById("fields").innerHTML = "";
       break;
   }
+}
+
+
+async function getUser(url) {
+  const response = await fetch(url, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return data;
 }
