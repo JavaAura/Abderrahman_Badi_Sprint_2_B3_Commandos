@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import model.Article;
 import model.Product;
 import repository.interfaces.ProductRepository;
 import util.PersistenceUtil;
@@ -18,34 +19,36 @@ import util.PersistenceUtil;
 public class ProductRepositoryImpl implements ProductRepository {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProductRepositoryImpl.class);
-	private static final int ITEMS_PER_PAGE = 5 ;
+
 	private static final String LIST = "SELECT p FROM Product p";
 	private static final String GET = "SELECT p FROM Product p WHERE p.id = :id";
 	private static final String SEARCH = "SELECT DISTINCT p FROM Product p  WHERE p.name LIKE :name";
+	private static final String COUNT = "SELECT COUNT(p) FROM Product p";
 
 	@Override
-	public List<Product> getAll(int pageNumber) {
-	    int startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;  
+	public List<Product> getAll(int page, int pageSize) {
+
 	    EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
-	    List<Product> products = null;
+
+	    List<Product> products = null;  
 
 	    try {
-	         
+	        
 	        TypedQuery<Product> query = entityManager.createQuery(LIST, Product.class);
- 
-	        query.setFirstResult(startIndex);
-	        query.setMaxResults(ITEMS_PER_PAGE);  
- 
-	        products = query.getResultList();
+	        query.setFirstResult((page - 1) * pageSize);  
+	        query.setMaxResults(pageSize);                
+
+	        products = query.getResultList();            
 
 	    } catch (Exception e) {
-	        logger.error("Error fetching products for page " + pageNumber, e);
+	        logger.error("Error fetching products for page " + page + " with pageSize " + pageSize, e);
 	    } finally {
-	        entityManager.close();
+	        entityManager.close();   
 	    }
 
-	    return products;
+	    return products;   
 	}
+
 
 
 	@Override
@@ -143,6 +146,22 @@ public class ProductRepositoryImpl implements ProductRepository {
 			entityManager.close();
 		}
 	}
+	
+	@Override
+	public long getTotalProductCount() {
+		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+
+		try {
+			TypedQuery<Long> query = entityManager.createQuery(COUNT, Long.class);
+			return query.getSingleResult();
+		} finally {
+			entityManager.close();
+		}
+	}
+
+
+
+ 
 
 
 }

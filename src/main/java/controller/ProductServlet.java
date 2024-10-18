@@ -1,17 +1,24 @@
 package controller;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
 import model.Product;
+import model.User;
+import model.enums.Role;
 import repository.implementation.ProductRepositoryImpl;
 import repository.interfaces.ProductRepository;
 import service.ProductService;
+import util.ThymeleafUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,29 +27,56 @@ import java.util.Optional;
 public class ProductServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
+	 private static final int PAGE_SIZE = 10;
 
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
+	 @Override
+	    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	            throws ServletException, IOException {
+	        TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+	        ServletContext servletContext = request.getServletContext();
+	        WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
-	    String action = request.getParameter("action");
-	    logger.info("Received action: {}", action); // Log the action
+	        HttpSession session = request.getSession();
+	        User loggedInUser = (User) session.getAttribute("user");
 
-	    if ("list".equals(action)) {
-	        try {
-	            int pageNumber = Integer.parseInt(request.getParameter("page"));
-	            List<Product> products = productService.getAllProducts(pageNumber);
-	            request.setAttribute("products", products);
-	            request.getRequestDispatcher("/WEB-INF/templates/view/dashboard/products.html").forward(request, response);
-	        } catch (NumberFormatException e) {
-	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid page number.");
+	        // Ensure user session exists and has the correct role
+	        if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
+	            response.sendRedirect("/login");  // Redirect if not logged in or not an admin
+	            return;
 	        }
-	    } else {
-	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
+
+	        // Pagination logic
+	        int page = 1; // default page is 1
+	        String pageParam = request.getParameter("page");
+	        if (pageParam != null) {
+	            try {
+	                page = Integer.parseInt(pageParam);
+	            } catch (NumberFormatException e) {
+	                logger.error("Error parsing pageParam: {}", pageParam, e);
+	            }
+	        }
+
+	        // Fetching products and total count
+	        List<Product> products = productService.getAllProducts(page, PAGE_SIZE); // Use PAGE_SIZE here
+	        long totalProductCount = productService.getTotalProductCount(); // Total count of products
+	        int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE); // Calculate total pages
+
+	        // Add variables to Thymeleaf context
+	        context.setVariable("user", loggedInUser);
+	        context.setVariable("products", products);
+	        context.setVariable("totalPages", totalPages); // Correctly calculated total pages
+	        context.setVariable("pageNumber", page);
+
+	        // Set content type for the response
+	        response.setContentType("text/html;charset=UTF-8");
+
+	        // Render the Thymeleaf template for products page
+	        templateEngine.process("views/dashboard/products", context, response.getWriter());
 	    }
-	}
+
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
