@@ -28,7 +28,7 @@ import java.util.Optional;
 public class ProductServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
-	 private static final int PAGE_SIZE = 10;
+	 private static final int PAGE_SIZE = 4;
 
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
@@ -42,28 +42,28 @@ public class ProductServlet extends HttpServlet {
 
 	    HttpSession session = request.getSession();
 	    
-	    // Hardcoded admin user for testing
+	  
 	    Admin user = new Admin();
 	    user.setFirstName("admin");
 	    user.setEmail("admin@youcode.ma");
 	    user.setRole(Role.ADMIN);
 	    user.setLevelAccess(1);
 	    
-	    // Set the test user in the session
+	
 	    session.setAttribute("user", user);
 	    
-	    // Retrieve the logged-in user from the session
+	   
 	    User loggedInUser = (User) session.getAttribute("user");
 
-	    // Ensure user session exists and has the correct role
+	   
 	    if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
 	        logger.warn("Unauthorized access attempt by user: {}", (loggedInUser != null ? loggedInUser.getEmail() : "unknown"));
-	        response.sendRedirect("/login");  // Redirect if not logged in or not an admin
+	        response.sendRedirect("/login");  
 	        return;
 	    }
 
-	    // Pagination logic
-	    int page = 1; // Default page is 1
+	  
+	    int page = 1;
 	    String pageParam = request.getParameter("page");
 	    if (pageParam != null) {
 	        try {
@@ -73,21 +73,21 @@ public class ProductServlet extends HttpServlet {
 	        }
 	    }
 
-	    // Fetching products and total count
-	    List<Product> products = productService.getAllProducts(page, PAGE_SIZE); // Use PAGE_SIZE here
-	    long totalProductCount = productService.getTotalProductCount(); // Total count of products
-	    int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE); // Calculate total pages
+	   
+	    List<Product> products = productService.getAllProducts(page, PAGE_SIZE); 
+	    long totalProductCount = productService.getTotalProductCount(); 
+	    int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE);
 
-	    // Add variables to Thymeleaf context
+
 	    context.setVariable("user", loggedInUser);
 	    context.setVariable("products", products);
-	    context.setVariable("totalPages", totalPages); // Correctly calculated total pages
+	    context.setVariable("totalPages", totalPages); 
 	    context.setVariable("pageNumber", page);
 
-	    // Set content type for the response
+	    
 	    response.setContentType("text/html;charset=UTF-8");
 
-	    // Render the Thymeleaf template for products page
+	  
 	    templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
 
@@ -116,7 +116,6 @@ public class ProductServlet extends HttpServlet {
 
  
 
- 
 	
 	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
@@ -124,28 +123,28 @@ public class ProductServlet extends HttpServlet {
 	    List<Product> products;
 
 	    if (name != null && !name.trim().isEmpty()) {
-	        // Search products by name
+	        
 	        products = productService.searchProduct(name);
 	    } else {
-	        // Fetch all products if no search query is provided
+	       
 	        products = productService.getAllProducts(1, PAGE_SIZE);
 	    }
 
-	    // Prepare the response
+	
 	    request.setAttribute("products", products);
-	    request.setAttribute("pageNumber", 1); // Reset page number for search results
-	    request.setAttribute("totalPages", 1); // Adjust accordingly if you implement pagination for search results
+	    request.setAttribute("pageNumber", 1); 
+	    request.setAttribute("totalPages", 1); 
 
 	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
 	    ServletContext servletContext = request.getServletContext();
 	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
 	    context.setVariable("products", products);
-	    context.setVariable("pageNumber", 1); // Update this if implementing pagination for search results
-	    context.setVariable("totalPages", 1); // Adjust if necessary
+	    context.setVariable("pageNumber", 1); 
+	    context.setVariable("totalPages", 1); 
 	    context.setVariable("user", request.getSession().getAttribute("user"));
 
-	    // Render the Thymeleaf template for products page
+
 	    response.setContentType("text/html;charset=UTF-8");
 	    templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
@@ -196,11 +195,13 @@ public class ProductServlet extends HttpServlet {
 	}
 
 	private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		Long id = Long.parseLong(request.getParameter("id"));
-		productService.deleteProduct(id);
-		response.sendRedirect("/products?action=list&page=1");
-		
-		
+	        throws ServletException, IOException {
+	    Long id = Long.parseLong(request.getParameter("id"));
+	    
+	    productService.deleteProduct(id);
+
+	    // Redirect to the products page after successful deletion
+	    response.sendRedirect(request.getContextPath() + "/dashboard/products");
 	}
+
 }
