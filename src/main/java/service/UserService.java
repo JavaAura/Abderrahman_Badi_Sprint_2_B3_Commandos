@@ -18,12 +18,13 @@ public class UserService {
 		return userRepository.get(id);
 	}
 
-	public List<User> getAllUsers(int pageNumber) {
-		return userRepository.getAll(pageNumber);
+	public List<User> getAllUsers(int pageNumber, int accessLevel) {
+		return userRepository.getAll(pageNumber, accessLevel);
 	}
 
-	public List<User> getAllClients(int pageNumber) {
-		return userRepository.getAllClients(pageNumber);
+
+	public int getTotalPageNumber(int accessLevel) {
+		return userRepository.getTotalPageNumber(accessLevel);
 	}
 
 	public void addUser(User user) {

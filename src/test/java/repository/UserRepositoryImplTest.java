@@ -95,7 +95,7 @@ public class UserRepositoryImplTest {
 
     @Test
     public void getAllUsersTest() {
-        List<User> users = userRepository.getAll(1);
+        List<User> users = userRepository.getAll(1, 1);
         assertTrue("Users list is empty", users.size() == 2);
         users.forEach(user -> System.out.println(user));
         assertNotNull(users);
@@ -103,7 +103,7 @@ public class UserRepositoryImplTest {
 
     @Test
     public void getAllClientsTest() {
-        List<User> users = userRepository.getAllClients(1);
+        List<User> users = userRepository.getAll(1, 2);
         logger.info("Fetched clients : " + users.get(0).getEmail());
         assertTrue("Clients list is empty", users.size() == 1);
         assertNotNull(users);
