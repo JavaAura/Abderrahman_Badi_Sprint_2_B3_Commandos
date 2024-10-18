@@ -28,15 +28,17 @@
         <a th:href="@{/dashboard}" class="py-4 px-6 text-sm font-medium hover:bg-gray-200">
           Dashboard
         </a>
-        <a th:href="@{/logout}" class="py-4 px-6 text-sm font-medium hover:bg-gray-200">
-          Logout
-        </a>
+      <form th:action="@{/logout}" method="post" onsubmit="return confirm('Are you sure you want to log out?');">
+    <input type="hidden" name="action" value="logout" />
+    <button type="submit" class="py-4 px-6 text-sm font-medium hover:bg-gray-200">
+        Logout
+    </button>
+</form>
+
       </div>
     </div>
-</div>
-</nav>
-
-<!-- Don't remove for tailwind to apply styles added by js -->
+    </nav>
+    <!-- Don't remove for tailwind to apply styles added by js -->
 <input type="hidden" class="rotate-180">
 
 <!-- Login Popup -->
@@ -52,25 +54,28 @@
       <h2 class="text-lg font-medium">Login in your account</h2>
       <!-- Modal body -->
       <div class="p-4 md:p-5 w-full">
-        <form class="space-y-4" action="#">
-          <div class="flex flex-col items-start">
-            <label for="email" class="mb-2 text-sm font-medium text-black">Email</label>
-            <input type="email" name="email" id="email"
-              class="bg-gray-50 border border-blue-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
-              placeholder="name@company.com" required />
-          </div>
-          <div class="flex flex-col items-start">
-            <label for="password" class="mb-2 text-sm font-medium text-black">Password</label>
-            <input type="password" name="password" id="password" placeholder="••••••••"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
-              required />
-          </div>
+              <form class="space-y-4" th:action="@{/login}" method="post">
+    <input type="hidden" name="action" value="login" />
+    <div class="flex flex-col items-start">
+        <label for="email" class="mb-2 text-sm font-medium text-black">Email</label>
+        <input type="email" name="email" id="email"
+            class="bg-gray-50 border border-blue-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
+            placeholder="name@company.com" required />
+    </div>
+    <div class="flex flex-col items-start">
+        <label for="password" class="mb-2 text-sm font-medium text-black">Password</label>
+        <input type="password" name="password" id="password" placeholder="••••••••"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
+            required />
+    </div>
 
-          <button type="submit"
-            class="w-full text-white bg-[#233876] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-            Login
-          </button>
-        </form>
+    <button type="submit"
+        class="w-full text-white bg-[#233876] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Login
+    </button>
+</form>
+
+
       </div>
     </div>
   </div>

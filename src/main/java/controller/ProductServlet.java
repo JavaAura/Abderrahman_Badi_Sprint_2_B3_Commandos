@@ -171,7 +171,7 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.updateProduct(product);
-		response.sendRedirect("/products?action=list&page=1");
+		response.sendRedirect(request.getContextPath() + "/dashboard/products");
 
 	}
 
@@ -191,7 +191,7 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.addProduct(product);
-		response.sendRedirect("/products?action=list&page=1");
+		response.sendRedirect(request.getContextPath() + "/dashboard/products");
 	}
 
 	private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
