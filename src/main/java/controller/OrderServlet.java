@@ -67,7 +67,6 @@ public class OrderServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
 		HttpSession session = request.getSession();
 		User loggedInUser = (User) session.getAttribute("user");
 
