@@ -27,7 +27,7 @@ import java.util.List;
 public class ProductServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
-	private static final int PAGE_SIZE = 5	;
+	private static final int PAGE_SIZE = 5;
 
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
@@ -46,6 +46,21 @@ public class ProductServlet extends HttpServlet {
 		if (loggedInUser == null) {
 			response.sendRedirect("/Commandos");
 			return;
+		}
+
+		String message = (String) session.getAttribute("message");
+		@SuppressWarnings("unchecked")
+		List<String> errorMessages = (List<String>) session.getAttribute("errorMessages");
+
+		logger.info("error messages from session : " + errorMessages);
+
+		if (message != null) {
+			context.setVariable("message", message);
+			session.removeAttribute("message"); // Clear after displaying
+		}
+		if (errorMessages != null) {
+			context.setVariable("errorMessages", errorMessages);
+			session.removeAttribute("errorMessages");
 		}
 
 		int page = 1;
@@ -114,8 +129,8 @@ public class ProductServlet extends HttpServlet {
 					}
 					return;
 				default:
-				response.sendRedirect("products");
-				break;
+					response.sendRedirect("products");
+					break;
 			}
 		}
 	}
@@ -154,18 +169,35 @@ public class ProductServlet extends HttpServlet {
 			throws ServletException, IOException {
 		List<String> errors = new ArrayList<>();
 		HttpSession session = request.getSession();
+		int stock;
+		double price;
 
 		Long id = Long.parseLong(request.getParameter("productId"));
 		String name = request.getParameter("name");
 		String description = request.getParameter("description");
-		int stock = Integer.parseInt(request.getParameter("stock"));
-		double price = Double.parseDouble(request.getParameter("price"));
+		try {
+			stock = Integer.parseInt(request.getParameter("stock"));
+		} catch (Exception e) {
+			errors.add("Stock should be a number");
+			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
+			return;
+		}
+		try {
+			price = Double.parseDouble(request.getParameter("price"));
+		} catch (Exception e) {
+			errors.add("Stock should be a number");
+			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
+			return;
+		}
 
 		Product product = productService.getProduct(id).orElse(null);
 
 		if (product == null) {
 			errors.add("Couldn't find product");
 			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
 			return;
 		}
 
@@ -180,6 +212,7 @@ public class ProductServlet extends HttpServlet {
 			productService.updateProduct(product);
 			session.setAttribute("message", "User updated successfully!");
 		} else {
+			logger.info("errors : " + errors);
 			session.setAttribute("errorMessages", errors);
 		}
 
