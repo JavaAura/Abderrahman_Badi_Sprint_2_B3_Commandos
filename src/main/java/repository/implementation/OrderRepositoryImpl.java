@@ -2,6 +2,7 @@ package repository.implementation;
 
 import model.Order;
 import model.User;
+import model.enums.Role;
 import model.enums.Statut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +24,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> getByClient(Long clientId, int page, int size) {
         int startIndex = (page - 1) * size;
-        logger.info("Client Id : " + clientId + " page : " + page + " size : " + size);
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         try {
-            String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId";
+            String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId ORDER BY o.id ASC";
             TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
             query.setParameter("clientId", clientId);
             query.setFirstResult(startIndex);
@@ -40,11 +40,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<Order> getAll(int page, int size) {
+        int startIndex = (page - 1) * size;
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         try {
-            String queryStr = "SELECT o FROM Order o";
+            String queryStr = "SELECT o FROM Order o ORDER BY o.id ASC";
             TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
-            query.setFirstResult(page * size);
+            query.setFirstResult(startIndex);
             query.setMaxResults(size);
             return query.getResultList();
         } finally {
@@ -74,10 +75,16 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order update(Order order) {
+    public Order update(Order order, User user) {
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         try {
+            if(user.getRole() == Role.ADMIN){
+                transaction.begin();
+                Order updatedOrder = entityManager.merge(order);
+                transaction.commit();
+                return updatedOrder;
+            }
             if (canModify(order)) {
                 transaction.begin();
                 Order updatedOrder = entityManager.merge(order);
@@ -141,7 +148,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     public int getTotalOrderCount() {
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         try {
-            String queryStr = "SELECT COUNT(o) FROM Orders o";
+            String queryStr = "SELECT COUNT(o) FROM Order o";
             TypedQuery<Long> query = entityManager.createQuery(queryStr, Long.class);
             Long count = query.getSingleResult();
             return count.intValue();

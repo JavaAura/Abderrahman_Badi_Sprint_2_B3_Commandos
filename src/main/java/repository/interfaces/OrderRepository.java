@@ -12,7 +12,7 @@ public interface OrderRepository {
 
     Order save(Order order);
 
-    Order update(Order order) ;
+    Order update(Order order, User user) ;
 
     void delete(Long orderId);
 

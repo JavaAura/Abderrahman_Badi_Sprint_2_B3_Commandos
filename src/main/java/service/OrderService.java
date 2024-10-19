@@ -35,8 +35,8 @@ public class OrderService {
     }
 
 
-    public Order updateOrder(Order order) {
-        return orderRepository.update(order);
+    public Order updateOrder(Order order, User user) {
+        return orderRepository.update(order, user);
     }
 
 

@@ -74,7 +74,7 @@
       <div class="flex items-center justify-between w-full">
         <h1 class="text-4xl">Users</h1>
         <button onclick="openModal(event, 'add')"
-          class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          class="block text-white bg-[#435274] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
           type="button">
           Add User
         </button>
@@ -84,7 +84,7 @@
       <div class="overflow-x-auto w-full h-full">
         <table class="min-w-full bg-white border border-gray-300 mx-auto">
           <thead>
-            <tr class="bg-gray-200 text-gray-700 ">
+            <tr class="bg-[#435274] text-white ">
               <th class="py-3 px-4 border-b">Id</th>
               <th class="py-3 px-4 border-b">First Name</th>
               <th class="py-3 px-4 border-b">Last Name</th>
@@ -103,7 +103,7 @@
               <td class="py-3 px-4 border-b flex items-center justify-center space-x-2">
 
                 <button onclick="openModal(event, 'update')"
-                  class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200 block">
+                  class="bg-[#435274] text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200 block">
                   Update
                 </button>
 
@@ -127,20 +127,20 @@
       <div class="flex items-center space-x-2">
         <!-- Previous button -->
         <a th:if="${pageNumber > 1}" th:href="@{?page={p}(p=${pageNumber - 1})}"
-          class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-l hover:bg-blue-600">
+          class="bg-[#435274] text-white font-semibold py-2 px-4 rounded-l hover:bg-blue-600">
           Previous
         </a>
 
         <!-- Page numbers -->
         <a th:each="i : ${#numbers.sequence(1, totalPages)}" th:href="@{?page={p}(p=${i})}"
-          th:classappend="${i == pageNumber} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-          class="font-semibold py-2 px-4 rounded hover:bg-blue-500 hover:text-white">
+          th:classappend="${i == pageNumber} ? 'bg-[#435274] text-white' : 'bg-gray-200 text-gray-700'"
+          class="font-semibold py-2 px-4 rounded hover:bg-[#435274] hover:text-white">
           <span th:text="${i}"></span>
         </a>
 
         <!-- Next button -->
         <a th:if="${pageNumber < totalPages}" th:href="@{?page={p}(p=${pageNumber + 1})}"
-          class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-r hover:bg-blue-600">
+          class="bg-[#435274] text-white font-semibold py-2 px-4 rounded-r hover:bg-blue-600">
           Next
         </a>
       </div>
