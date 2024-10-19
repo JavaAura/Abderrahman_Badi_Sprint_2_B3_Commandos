@@ -46,11 +46,6 @@ function closeModal() {
   document.getElementById("user_modal").classList.add("hidden");
 }
 
-function closeMessagePopup(event) {
-  let message_container = event.currentTarget;
-  message_container.classList.add("hidden");
-}
-
 async function showFields(event) {
   if (event === null) {
     document.getElementById("fields").innerHTML = `

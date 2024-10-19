@@ -84,12 +84,12 @@ public class UserRepositoryImpl implements UserRepository {
 			if (accessLevel == 1) {
                 typedQuery = entityManager
                         .createQuery(
-                                "SELECT u FROM User u WHERE u.isDeleted = false AND TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
+                                "SELECT u FROM User u WHERE u.isDeleted = false AND TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ORDER BY u.id ASC",
                                 User.class);
             } else {
                 typedQuery = entityManager
                         .createQuery(
-                                "SELECT c FROM Client c WHERE c.isDeleted = false",
+                                "SELECT c FROM Client c WHERE c.isDeleted = false ORDER BY c.id",
                                 User.class);
             }
 
