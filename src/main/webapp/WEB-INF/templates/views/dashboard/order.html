@@ -107,10 +107,13 @@
 
 
 
-                  <button class="bg-[#435274] text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
-                    th:unless="${order.orderStatut.name() == 'SHIPPED'}">
-                    Update
-                  </button>
+                  <form action="" method="get" th:unless="${order.orderStatut.name() == 'SHIPPED'}">
+                    <input type="hidden" name="id" th:value="${order.id}" />
+                    <button type="submit" class="bg-[#435274] text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200">
+                      Update
+                    </button>
+                  </form>
+
 
                   <form action="" method="post">
                     <input type="hidden" name="id" th:value="${order.id}" />

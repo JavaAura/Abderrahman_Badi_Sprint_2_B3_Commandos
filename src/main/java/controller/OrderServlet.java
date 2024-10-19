@@ -61,14 +61,17 @@ public class OrderServlet extends HttpServlet {
 			return;
 		}
 
-
-
 		switch (loggedInUser.getRole()) {
 			case ADMIN:
 				showAllOrders(request, response, loggedInUser);
 				break;
 
 			case CLIENT:
+				String orderIdParam = request.getParameter("id");
+				if (orderIdParam != null && !orderIdParam.trim().isEmpty()) {
+					long orderId = Long.parseLong(orderIdParam);
+					showOrderDetails(request, response, orderId);
+				}
 				showCLientOrders(request, response, loggedInUser);
 				break;
 
@@ -89,7 +92,9 @@ public class OrderServlet extends HttpServlet {
 			return;
 		}
 
+
 		String action = request.getParameter("action");
+
 		if (action != null) {
 			switch (action) {
 				case "add":
@@ -223,7 +228,7 @@ public class OrderServlet extends HttpServlet {
 		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 		context.setVariable("user", loggedInUser);
 
-		// Pagination setup
+
 		int page = 1;
 		String pageParam = request.getParameter("page");
 		if (pageParam != null && !pageParam.isEmpty()) {
@@ -265,5 +270,35 @@ public class OrderServlet extends HttpServlet {
 
 		orderService.createOrder(order);
 	}
+
+
+
+
+
+	protected void showOrderDetails(HttpServletRequest request, HttpServletResponse response, long orderId)
+			throws ServletException, IOException {
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+		ServletContext servletContext = request.getServletContext();
+		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+		try {
+
+			Order order = orderService.getOrderById(orderId);
+
+			if (order != null) {
+				context.setVariable("order", order);
+				response.setContentType("text/html;charset=UTF-8");
+				templateEngine.process("views/dashboard/orderDetails", context, response.getWriter());
+			} else {
+				logger.warn("Order with ID {} not found", orderId);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
+			}
+		} catch (Exception e) {
+			logger.error("Error retrieving order details for ID " + orderId, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error retrieving order details");
+		}
+	}
+
+
 
 }
