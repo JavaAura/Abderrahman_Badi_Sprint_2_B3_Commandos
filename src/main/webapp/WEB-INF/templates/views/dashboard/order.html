@@ -108,7 +108,7 @@
 
 
                   <form action="" method="get" th:unless="${order.orderStatut.name() == 'SHIPPED'}">
-                    <input type="hidden" name="id" th:value="${order.id}" />
+                    <input type="hidden" name="order_id" th:value="${order.id}" />
                     <button type="submit" class="bg-[#435274] text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200">
                       Update
                     </button>
