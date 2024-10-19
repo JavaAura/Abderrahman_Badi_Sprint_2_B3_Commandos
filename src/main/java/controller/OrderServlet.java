@@ -240,9 +240,7 @@ public class OrderServlet extends HttpServlet {
 		order.setOrderStatut(Statut.WAITING);
 		order.setClient(client);
 
-
 		order.setProducts(products);
-
 
 		orderService.createOrder(order);
 	}
