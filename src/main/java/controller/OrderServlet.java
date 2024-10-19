@@ -1,5 +1,6 @@
 package controller;
 
+import model.Client;
 import model.Order;
 import model.Product;
 import model.User;
@@ -24,7 +25,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OrderServlet extends HttpServlet {
 
@@ -87,7 +91,35 @@ public class OrderServlet extends HttpServlet {
 		if (action != null) {
 			switch (action) {
 				case "add":
-					break;
+					try {
+						String[] selectedProductIds = request.getParameterValues("selectedProducts");
+						List<Product> selectedProducts = new ArrayList<>();
+
+						if (selectedProductIds != null) {
+							for (String productId : selectedProductIds) {
+								Optional<Product> optionalProduct = productService.getProduct(Long.parseLong(productId));
+								if (optionalProduct.isPresent()) {
+									selectedProducts.add(optionalProduct.get());
+								} else {
+
+									logger.warn("Produit avec l'ID {} non trouvé", productId);
+								}
+							}
+						}
+
+						Client client = (Client) loggedInUser;
+						addOrderWithProducts(selectedProducts, client);
+
+						response.setStatus(HttpServletResponse.SC_OK);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"message\": \"Order added successfully !\"}");
+					} catch (Exception e) {
+						logger.error("Erreur lors de l'ajout de la commande : {}", e.getMessage());
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"Erreur lors de l'ajout de la commande\"}");
+					}
+
 				case "delete":
 					break;
 				case "update":
@@ -198,4 +230,21 @@ public class OrderServlet extends HttpServlet {
 		response.setContentType("text/html;charset=UTF-8");
 		templateEngine.process("views/dashboard/admin/order", context, response.getWriter());
 	}
+
+
+
+	public void addOrderWithProducts(List<Product> products, Client client) {
+
+		Order order = new Order();
+		order.setOrderDate(LocalDate.now());
+		order.setOrderStatut(Statut.WAITING);
+		order.setClient(client);
+
+
+		order.setProducts(products);
+
+
+		orderService.createOrder(order);
+	}
+
 }
