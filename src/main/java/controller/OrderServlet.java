@@ -61,6 +61,8 @@ public class OrderServlet extends HttpServlet {
 			return;
 		}
 
+
+
 		switch (loggedInUser.getRole()) {
 			case ADMIN:
 				showAllOrders(request, response, loggedInUser);
@@ -110,6 +112,10 @@ public class OrderServlet extends HttpServlet {
 						Client client = (Client) loggedInUser;
 						addOrderWithProducts(selectedProducts, client);
 
+
+						String Refererche = request.getHeader("Referer");
+						response.sendRedirect(Refererche);
+
 						response.setStatus(HttpServletResponse.SC_OK);
 						response.setContentType("application/json");
 						response.getWriter().write("{\"message\": \"Order added successfully !\"}");
@@ -127,7 +133,7 @@ public class OrderServlet extends HttpServlet {
 
 						orderService.deleteOrder(order_Id);
 						logger.info("Order with ID " + order_Id + " has been deleted.");
-						
+
 						String referer = request.getHeader("Referer");
 						response.sendRedirect(referer);
 						return;
