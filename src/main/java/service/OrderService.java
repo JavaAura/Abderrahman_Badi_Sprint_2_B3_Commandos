@@ -2,12 +2,15 @@ package service;
 
 import model.Order;
 import model.enums.Statut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import repository.interfaces.OrderRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
 
@@ -16,8 +19,8 @@ public class OrderService {
     }
 
 
-    public List<Order> getOrdersByClient(Long clientId, int page, int size, String searchQuery) {
-        return orderRepository.getByClient(clientId, page, size, searchQuery);
+    public List<Order> getOrdersByClient(Long clientId, int page, int size) {
+        return orderRepository.getByClient(clientId, page, size);
     }
 
 
@@ -52,25 +55,41 @@ public class OrderService {
 
 
 
-    public List<Order> getAllOrders_No_historique(int page, int size) {
-        List<Order> listO = orderRepository.getAll(page, size);
+    public List<Order> getAllOrders_No_historique(long clientId,int page, int size) {
+        List<Order> list = orderRepository.getByClient(clientId, page, size);
 
-        return listO.stream()
-                .filter(order -> order.getOrderStatut() == Statut.WAITING ||
-                        order.getOrderStatut() == Statut.PROCESSING ||
-                        order.getOrderStatut() == Statut.SHIPPED)
+        list.forEach(order -> logger.info("Order : " + order.toString()));
+
+        list.forEach(order -> {
+            System.out.println("order: " + order.getId() +
+                    ", Order Date: " + order.getOrderDate() +
+                    ", Status: " + order.getOrderStatut());
+        });
+
+        return list.stream()
+                .filter(order -> (order.getClient().getId() == clientId) &&
+                        (order.getOrderStatut() == Statut.WAITING || order.getOrderStatut() == Statut.PROCESSING ||
+                                order.getOrderStatut() == Statut.SHIPPED))
                 .collect(Collectors.toList());
     }
+
+
+
     public List<Order> getAllOrderHistorique(int page, int size) {
-        List<Order> listO = orderRepository.getAll(page, size);
+        List<Order> list = orderRepository.getAll(page, size);
 
-        return listO.stream()
+        return list.stream()
                 .filter(order -> order.getOrderStatut() == Statut.DELIVERED ||
-                        order.getOrderStatut() == Statut.CANCELED)
+                order.getOrderStatut() == Statut.CANCELED)
                 .collect(Collectors.toList());
     }
 
 
+    public int getTotalOrderCount() {
+        return  orderRepository.getTotalOrderCount();
+    }
 
-
+    public int getTotalOrderCountByStatus(){
+        return  orderRepository.getTotalOrderCountByStatus();
+    }
 }

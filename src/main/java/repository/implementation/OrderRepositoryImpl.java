@@ -15,19 +15,20 @@ import java.util.List;
 public class OrderRepositoryImpl implements OrderRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderRepositoryImpl.class);
-    private static final int ITEMS_PER_PAGE = 5;
+
 
     @Override
-    public List<Order> getByClient(Long clientId, int page, int size, String searchQuery) {
+    public List<Order> getByClient(Long clientId, int page, int size) {
+        int startIndex = (page - 1) * size;
+        logger.info("Client Id : " + clientId + " page : " + page + " size : " + size);
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         try {
-            String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId AND " +
-                    "(o.orderStatut LIKE :searchQuery OR o.id LIKE :searchQuery)";
+            String queryStr = "SELECT o FROM Order o WHERE o.client.id = :clientId";
             TypedQuery<Order> query = entityManager.createQuery(queryStr, Order.class);
             query.setParameter("clientId", clientId);
-            query.setParameter("searchQuery", "%" + (searchQuery != null ? searchQuery : "") + "%");
-            query.setFirstResult(page * size);
+            query.setFirstResult(startIndex);
             query.setMaxResults(size);
+
             return query.getResultList();
         } finally {
             entityManager.close();
@@ -47,6 +48,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             entityManager.close();
         }
     }
+
 
     @Override
     public Order save(Order order) {
@@ -131,4 +133,33 @@ public class OrderRepositoryImpl implements OrderRepository {
         // Use the Statut enum directly for comparison
         return order.getOrderStatut() == Statut.WAITING || order.getOrderStatut() == Statut.PROCESSING;
     }
+
+    @Override
+    public int getTotalOrderCount() {
+        EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+        try {
+            String queryStr = "SELECT COUNT(o) FROM Orders o";
+            TypedQuery<Long> query = entityManager.createQuery(queryStr, Long.class);
+            Long count = query.getSingleResult();
+            return count.intValue();
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public int getTotalOrderCountByStatus() {
+        EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+        try {
+            String queryStr = "SELECT COUNT(o) FROM Order o WHERE o.orderStatut IN (:statusList)";
+            TypedQuery<Long> query = entityManager.createQuery(queryStr, Long.class);
+            query.setParameter("statusList", List.of(Statut.WAITING, Statut.PROCESSING, Statut.SHIPPED));
+            Long count = query.getSingleResult();
+            return count.intValue();
+        } finally {
+            entityManager.close();
+        }
+    }
+
+
 }

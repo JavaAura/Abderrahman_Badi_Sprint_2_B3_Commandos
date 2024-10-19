@@ -6,7 +6,7 @@ import model.enums.Statut;
 
 public interface OrderRepository {
 
-    List<Order> getByClient(Long clientId, int page, int size, String searchQuery);
+    List<Order> getByClient(Long clientId, int page, int size);
 
     List<Order> getAll(int page, int size);
 
@@ -19,4 +19,8 @@ public interface OrderRepository {
     Order get(Long orderId);
 
     boolean canModify(Order order);
+
+    public int getTotalOrderCount();
+    public int getTotalOrderCountByStatus();
+
 }

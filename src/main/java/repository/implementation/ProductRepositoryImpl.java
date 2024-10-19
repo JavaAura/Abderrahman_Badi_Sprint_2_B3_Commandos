@@ -164,4 +164,23 @@ public class ProductRepositoryImpl implements ProductRepository {
  
 
 
+	@Override
+	public List<Product> getAllProducts() {
+		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+		List<Product> products = null;
+
+		try {
+			TypedQuery<Product> query = entityManager.createQuery(LIST, Product.class);
+			products = query.getResultList();
+		} catch (Exception e) {
+			logger.error("Error fetching all products", e);
+		} finally {
+			entityManager.close();
+		}
+
+		return products;
+	}
+
+
+
 }
