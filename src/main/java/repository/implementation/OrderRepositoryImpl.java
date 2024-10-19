@@ -10,6 +10,7 @@ import util.PersistenceUtil;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import java.util.Arrays;
 import java.util.List;
 
 public class OrderRepositoryImpl implements OrderRepository {
@@ -153,13 +154,14 @@ public class OrderRepositoryImpl implements OrderRepository {
         try {
             String queryStr = "SELECT COUNT(o) FROM Order o WHERE o.orderStatut IN (:statusList)";
             TypedQuery<Long> query = entityManager.createQuery(queryStr, Long.class);
-            query.setParameter("statusList", List.of(Statut.WAITING, Statut.PROCESSING, Statut.SHIPPED));
+            query.setParameter("statusList", Arrays.asList(Statut.WAITING, Statut.PROCESSING, Statut.SHIPPED));
             Long count = query.getSingleResult();
             return count.intValue();
         } finally {
             entityManager.close();
         }
     }
+
 
 
 }

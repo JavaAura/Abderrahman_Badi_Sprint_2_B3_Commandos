@@ -1,6 +1,7 @@
 package controller;
 
 import model.Order;
+import model.Product;
 import model.User;
 import model.enums.Role;
 import org.slf4j.Logger;
@@ -8,8 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import repository.implementation.OrderRepositoryImpl;
+import repository.implementation.ProductRepositoryImpl;
 import repository.interfaces.OrderRepository;
+import repository.interfaces.ProductRepository;
 import service.OrderService;
+import service.ProductService;
 import util.ThymeleafUtil;
 
 import javax.servlet.ServletContext;
@@ -28,11 +32,15 @@ public class OrderServlet extends HttpServlet {
 
 	private OrderRepository repository;
 	private OrderService orderService;
+	private ProductService productService;
+	private ProductRepository productRepository;
 
 	@Override
 	public void init() throws ServletException {
 		this.repository = new OrderRepositoryImpl();
+		this.productRepository = new ProductRepositoryImpl();
 		this.orderService = new OrderService(repository);
+		this.productService = new ProductService(productRepository);
 	}
 
 	@Override
@@ -81,12 +89,19 @@ public class OrderServlet extends HttpServlet {
 
 
 		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
+
+
 		logger.info("Orders retrieved: " + orderList_No_historique);
 
+
+		List<Product> listofProduct = productService.getAllProducts();
+
+		logger.info("list product : " +listofProduct);
 
 		int totalOrders = orderService.getTotalOrderCountByStatus();
 		int totalPages = (int) Math.ceil((double) totalOrders / size);
 
+        context.setVariable("listofProduct", listofProduct);
 		context.setVariable("orderList_No_historique", orderList_No_historique);
 		context.setVariable("pageNumber", page);
 		context.setVariable("totalPages", totalPages);
