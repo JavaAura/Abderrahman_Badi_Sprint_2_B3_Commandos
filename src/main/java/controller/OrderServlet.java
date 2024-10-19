@@ -2,7 +2,8 @@ package controller;
 
 import model.Order;
 import model.User;
-import model.enums.Role;
+import model.enums.Statut;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
@@ -66,6 +67,14 @@ public class OrderServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		User loggedInUser = (User) session.getAttribute("user");
+
+		if (loggedInUser == null) {
+			response.sendRedirect("/Commandos");
+			return;
+		}
+
 		String action = request.getParameter("action");
 		if (action != null) {
 			switch (action) {
@@ -76,7 +85,30 @@ public class OrderServlet extends HttpServlet {
 				case "update":
 					break;
 				case "update_status":
+					try {
+						long orderId = Long.parseLong(request.getParameter("order_id"));
+						Statut orderStatus = Statut.valueOf(request.getParameter("status"));
+						Order order = orderService.getOrderById(orderId);
 
+						if (order != null) {
+							order.setOrderStatut(orderStatus);
+
+							orderService.updateOrder(order, loggedInUser);
+
+							response.setStatus(HttpServletResponse.SC_OK);
+							response.setContentType("application/json");
+							response.getWriter().write("{\"message\": \"Status updated successfully !\"}");
+						} else {
+							response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+							response.getWriter().write("{\"error\": \"User not found\"}");
+						}
+
+					} catch (Exception e) {
+						logger.info("Error occured during order status update .", e);
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"unkown error occured\"}");
+					}
 					return;
 				default:
 					break;
@@ -141,13 +173,14 @@ public class OrderServlet extends HttpServlet {
 
 		int size = 5;
 
-		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
-		logger.info("Orders retrieved: " + orderList_No_historique);
+		List<Order> orders = orderService.getAllOrders(page, size);
+		logger.info("Orders retrieved: " + orders);
 
-		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
+		int totalOrders = orderService.getTotalOrderCount();
 		int totalPages = (int) Math.ceil((double) totalOrders / size);
+		logger.info("Orders count : " + totalOrders);
 
-		context.setVariable("orderList_No_historique", orderList_No_historique);
+		context.setVariable("orders", orders);
 		context.setVariable("pageNumber", page);
 		context.setVariable("totalPages", totalPages);
 
