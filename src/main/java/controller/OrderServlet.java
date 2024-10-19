@@ -1,6 +1,7 @@
 package controller;
 
 import model.Order;
+import model.Product;
 import model.User;
 import model.enums.Statut;
 
@@ -9,8 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import repository.implementation.OrderRepositoryImpl;
+import repository.implementation.ProductRepositoryImpl;
 import repository.interfaces.OrderRepository;
+import repository.interfaces.ProductRepository;
 import service.OrderService;
+import service.ProductService;
 import util.ThymeleafUtil;
 
 import javax.servlet.ServletContext;
@@ -27,12 +31,16 @@ public class OrderServlet extends HttpServlet {
 	private static final Logger logger = LoggerFactory.getLogger(OrderServlet.class);
 
 	private OrderRepository repository;
+	private ProductRepository productRepository;
 	private OrderService orderService;
+	private ProductService productService;
 
 	@Override
 	public void init() throws ServletException {
 		this.repository = new OrderRepositoryImpl();
 		this.orderService = new OrderService(repository);
+		this.productRepository = new ProductRepositoryImpl();
+		this.productService = new ProductService(productRepository);
 	}
 
 	@Override
@@ -139,6 +147,8 @@ public class OrderServlet extends HttpServlet {
 		int size = 5;
 
 		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
+		List<Product> products = productService.getAllProducts();
+
 		logger.info("Orders retrieved: " + orderList_No_historique);
 
 		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
@@ -147,6 +157,7 @@ public class OrderServlet extends HttpServlet {
 		context.setVariable("orderList_No_historique", orderList_No_historique);
 		context.setVariable("pageNumber", page);
 		context.setVariable("totalPages", totalPages);
+		context.setVariable("listofProduct", products);
 
 		response.setContentType("text/html;charset=UTF-8");
 		templateEngine.process("views/dashboard/order", context, response.getWriter());
