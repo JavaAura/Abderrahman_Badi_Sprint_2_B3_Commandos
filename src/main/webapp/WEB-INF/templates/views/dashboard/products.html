@@ -26,8 +26,9 @@
           <h2 class="text-lg font-medium">Adding product</h2>
           <!-- Modal body -->
           <div class="p-4 md:p-5 w-full">
-            <form class="space-y-4 text-gray-800" action="" method="post">
+            <form class="space-y-4 text-gray-800" method="post">
               <input type="hidden" id="action" name="action">
+              <input type="hidden" id="productId" name="productId">
               <div class="flex flex-col items-start">
                 <label class="mb-2 text-sm font-medium">Product Name</label>
                 <input type="text" name="name" id="name"
@@ -42,13 +43,13 @@
               </div>
               <div class="flex flex-col items-start">
                 <label for="email" class="mb-2 text-sm font-medium">Stock</label>
-                <input type="number" name="stock" id="stock"
+                <input type="text" name="stock" id="stock"
                   class="bg-gray-50 border border-blue-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
                   required />
               </div>
               <div class="flex flex-col items-start">
                 <label class="mb-2 text-sm font-medium">Price</label>
-                <input type="number" name="price" id="price"
+                <input type="text" name="price" id="price"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-lg"
                   required />
               </div>
@@ -66,7 +67,6 @@
     <div class="flex flex-col items-center w-full gap-8">
       <div class="flex items-center justify-between w-full">
         <h1 class="text-4xl">Products</h1>
-
         <div class="flex w-full mx-10 rounded bg-white items-center">
           <form action="products" method="post" class="flex w-full">
             <input type="hidden" name="action" value="search" />
@@ -83,12 +83,10 @@
           </form>
         </div>
 
-        <button onclick="openModal(event, 'add')"
+        <button th:unless="${user.role.name() == 'CLIENT'}" onclick="openModal(event, 'add')"
           class="block text-white bg-[#435274] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
           Add Product
         </button>
-
-
       </div>
 
 
@@ -155,7 +153,7 @@
       <span class="mt-2 text-gray-700"> Page <span th:text="${pageNumber}"></span> of <span th:text="${totalPages}"></span>
       </span>
     </div>
-    <script th:src="@{/js/addProduct.js}"></script>
+    <script th:src="@{/js/product_modal.js}"></script>
   </section>
 
 </body>

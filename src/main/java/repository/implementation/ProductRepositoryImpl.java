@@ -20,9 +20,9 @@ public class ProductRepositoryImpl implements ProductRepository {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProductRepositoryImpl.class);
 
-	private static final String LIST = "SELECT p FROM Product p";
+	private static final String LIST = "SELECT p FROM Product p ORDER BY p.id ASC";
 	private static final String GET = "SELECT p FROM Product p WHERE p.id = :id";
-	private static final String SEARCH = "SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(:name)";
+	private static final String SEARCH = "SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(:name) ORDER BY p.id ASC";
 	private static final String COUNT = "SELECT COUNT(p) FROM Product p";
 
 	@Override

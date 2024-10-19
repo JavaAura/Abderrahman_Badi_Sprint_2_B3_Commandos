@@ -15,7 +15,6 @@ async function openModal(event, action) {
 
     const data = await getUser(url);
 
-    console.log(data);
 
     if (data) {
       document.getElementById("firstName").value = data.firstName;

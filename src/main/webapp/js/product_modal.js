@@ -12,9 +12,20 @@ async function openModal(event, action) {
     let url = `${window.location.protocol}//${host}:${port}/${urlPathname}?action=get&product_id=${productId}`;
 
     const data = await getProduct(url);
-
-    console.log(data);
     
+    if (data.id) {
+      document.getElementById("productId").value = data.id;
+      document.getElementById("name").value = data.name;
+      document.getElementById("description").value = data.description;
+      document.getElementById("stock").value = data.stock;
+      document.getElementById("price").value = data.price;
+    }
+  } else {
+    document.getElementById("productId").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("stock").value = "";
+    document.getElementById("price").value = "";
   }
 
   document.getElementById("product_modal").classList.remove("hidden");
@@ -29,11 +40,9 @@ function closeMessagePopup(event) {
   message_container.classList.add("hidden");
 }
 
- 
-
 async function getProduct(url) {
   const response = await fetch(url, {
-    method: "GET",
+    method: "POST",
   });
 
   if (!response.ok) {
