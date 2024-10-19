@@ -1,21 +1,46 @@
-// Get modal and buttons
-  const productModal = document.getElementById('productModal');
-  const openModalBtn = document.querySelector('.open-modal-button'); // Adjust this selector to your button's class or id
-  const closeModalBtn = document.getElementById('closeProductModalBtn');
+async function openModal(event, action) {
+  document.getElementById("action").value = action;
+  if (action === "update") {
+    let row = event.currentTarget.closest("tr");
+    let productIdTd = row.querySelector("td:first-child");
+    let productId = productIdTd.textContent.trim();
 
-  // Open modal function
-  openModalBtn.addEventListener('click', () => {
-      productModal.classList.remove('hidden'); // Show the modal
+    let host = window.location.hostname;
+    let port = window.location.port;
+    let urlPathname = "Commandos/dashboard/products";
+
+    let url = `${window.location.protocol}//${host}:${port}/${urlPathname}?action=get&product_id=${productId}`;
+
+    const data = await getProduct(url);
+
+    console.log(data);
+    
+  }
+
+  document.getElementById("product_modal").classList.remove("hidden");
+}
+
+function closeModal() {
+  document.getElementById("product_modal").classList.add("hidden");
+}
+
+function closeMessagePopup(event) {
+  let message_container = event.currentTarget;
+  message_container.classList.add("hidden");
+}
+
+ 
+
+async function getProduct(url) {
+  const response = await fetch(url, {
+    method: "GET",
   });
 
-  // Close modal function
-  closeModalBtn.addEventListener('click', () => {
-      productModal.classList.add('hidden'); // Hide the modal
-  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
 
-  // Optional: Close modal when clicking outside the modal content
-  productModal.addEventListener('click', (event) => {
-      if (event.target === productModal) {
-          productModal.classList.add('hidden'); // Hide the modal
-      }
-  });
+  const data = await response.json();
+
+  return data;
+}
