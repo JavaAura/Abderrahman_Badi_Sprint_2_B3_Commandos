@@ -121,6 +121,20 @@ public class OrderServlet extends HttpServlet {
 					}
 
 				case "delete":
+					Long order_Id = Long.parseLong(request.getParameter("id"));
+
+					try {
+
+						orderService.deleteOrder(order_Id);
+						logger.info("Order with ID " + order_Id + " has been deleted.");
+						
+						String referer = request.getHeader("Referer");
+						response.sendRedirect(referer);
+						return;
+					} catch (Exception e) {
+						logger.error("Error deleting order", e);
+						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting order");
+					}
 					break;
 				case "update":
 					break;
@@ -239,6 +253,7 @@ public class OrderServlet extends HttpServlet {
 		order.setOrderDate(LocalDate.now());
 		order.setOrderStatut(Statut.WAITING);
 		order.setClient(client);
+
 
 		order.setProducts(products);
 
