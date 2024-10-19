@@ -288,7 +288,7 @@ public class OrderServlet extends HttpServlet {
 			if (order != null) {
 				context.setVariable("order", order);
 				response.setContentType("text/html;charset=UTF-8");
-				templateEngine.process("views/dashboard/orderDetails", context, response.getWriter());
+				templateEngine.process("views/dashboard/orderupdate", context, response.getWriter());
 			} else {
 				logger.warn("Order with ID {} not found", orderId);
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
