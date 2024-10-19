@@ -47,18 +47,7 @@ public class OrderServlet extends HttpServlet {
 		logger.info("Session user: " + loggedInUser);
 
 		if (loggedInUser == null) {
-
-			loggedInUser = new User();
-			loggedInUser.setId(3L);
-			loggedInUser.setFirstName("client");
-			loggedInUser.setEmail("client3@youcode.ma");
-			loggedInUser.setRole(Role.CLIENT);
-			session.setAttribute("user", loggedInUser);
-		}
-
-		if (loggedInUser.getId() == null) {
-			logger.error("User ID is null!");
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID cannot be null.");
+			response.sendRedirect("/Commandos");	
 			return;
 		}
 
@@ -84,7 +73,7 @@ public class OrderServlet extends HttpServlet {
 		logger.info("Orders retrieved: " + orderList_No_historique);
 
 
-		int totalOrders = orderService.getTotalOrderCountByStatus();
+		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
 		int totalPages = (int) Math.ceil((double) totalOrders / size);
 
 		context.setVariable("orderList_No_historique", orderList_No_historique);
