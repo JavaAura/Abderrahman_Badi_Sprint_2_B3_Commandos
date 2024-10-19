@@ -12,166 +12,211 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
-import model.Admin;
 import model.Product;
 import model.User;
-import model.enums.Role;
 import repository.implementation.ProductRepositoryImpl;
 import repository.interfaces.ProductRepository;
 import service.ProductService;
 import util.ThymeleafUtil;
+import util.Validator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ProductServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
-	 private static final int PAGE_SIZE = 4;
+	private static final int PAGE_SIZE = 5;
 
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
-	    ServletContext servletContext = request.getServletContext();
-	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+			throws ServletException, IOException {
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+		ServletContext servletContext = request.getServletContext();
+		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
-	    HttpSession session = request.getSession();
-	    
-	  
-	    Admin user = new Admin();
-	    user.setFirstName("admin");
-	    user.setEmail("admin@youcode.ma");
-	    user.setRole(Role.ADMIN);
-	    user.setLevelAccess(1);
-	    
-	
-	    session.setAttribute("user", user);
-	    
-	   
-	    User loggedInUser = (User) session.getAttribute("user");
+		HttpSession session = request.getSession();
 
-	   
-	    if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
-	        logger.warn("Unauthorized access attempt by user: {}", (loggedInUser != null ? loggedInUser.getEmail() : "unknown"));
-	        response.sendRedirect("/login");  
-	        return;
-	    }
+		User loggedInUser = (User) session.getAttribute("user");
 
-	  
-	    int page = 1;
-	    String pageParam = request.getParameter("page");
-	    if (pageParam != null) {
-	        try {
-	            page = Integer.parseInt(pageParam);
-	        } catch (NumberFormatException e) {
-	            logger.error("Error parsing pageParam: {}", pageParam, e);
-	        }
-	    }
+		if (loggedInUser == null) {
+			response.sendRedirect("/Commandos");
+			return;
+		}
 
-	   
-	    List<Product> products = productService.getAllProducts(page, PAGE_SIZE); 
-	    long totalProductCount = productService.getTotalProductCount(); 
-	    int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE);
+		String message = (String) session.getAttribute("message");
+		@SuppressWarnings("unchecked")
+		List<String> errorMessages = (List<String>) session.getAttribute("errorMessages");
 
+		logger.info("error messages from session : " + errorMessages);
 
-	    context.setVariable("user", loggedInUser);
-	    context.setVariable("products", products);
-	    context.setVariable("totalPages", totalPages); 
-	    context.setVariable("pageNumber", page);
+		if (message != null) {
+			context.setVariable("message", message);
+			session.removeAttribute("message"); // Clear after displaying
+		}
+		if (errorMessages != null) {
+			context.setVariable("errorMessages", errorMessages);
+			session.removeAttribute("errorMessages");
+		}
 
-	    
-	    response.setContentType("text/html;charset=UTF-8");
+		int page = 1;
+		String pageParam = request.getParameter("page");
+		if (pageParam != null) {
+			try {
+				page = Integer.parseInt(pageParam);
+			} catch (NumberFormatException e) {
+				logger.error("Error parsing pageParam: {}", pageParam, e);
+			}
+		}
 
-	  
-	    templateEngine.process("views/dashboard/products", context, response.getWriter());
+		List<Product> products = productService.getAllProducts(page, PAGE_SIZE);
+		long totalProductCount = productService.getTotalProductCount();
+		int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE);
+
+		context.setVariable("user", loggedInUser);
+		context.setVariable("products", products);
+		context.setVariable("totalPages", totalPages);
+		context.setVariable("pageNumber", page);
+
+		response.setContentType("text/html;charset=UTF-8");
+
+		templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
-
-
-
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		String action = request.getParameter("action");
+		if (action != null) {
+			logger.info("action is : " + action);
+			switch (action) {
+				case "add":
+					addProduct(request, response);
+					break;
+				case "update":
+					logger.info("action is here");
+					updateProduct(request, response);
+					break;
+				case "delete":
+					deleteProduct(request, response);
+					break;
+				case "search":
+					searchProduct(request, response);
+					break;
+				case "get":
+					try {
+						long productId = Long.parseLong(request.getParameter("product_id"));
+						Product product = productService.getProduct(productId).orElse(null);
+						if (product != null) {
+							String jsonResponse = convertProductToJson(product);
+							response.setStatus(HttpServletResponse.SC_OK);
 
-		if ("add".equals(action)) {
-			addProduct(request, response);
-		} else if ("update".equals(action)) {
-			updateProduct(request, response);
-		} else if ("delete".equals(action)) {
-			deleteProduct(request, response);
-		} else if ("search".equals(action)) {
-			searchProduct(request, response);
+							response.setContentType("application/json");
+							response.getWriter().write(jsonResponse);
+						} else {
+							response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+							response.getWriter().write("{\"error\": \"Product not found\"}");
+						}
+
+					} catch (Exception e) {
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"error\"}");
+					}
+					return;
+				default:
+					response.sendRedirect("products");
+					break;
+			}
+		}
+	}
+
+	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String name = request.getParameter("name");
+		List<Product> products;
+
+		if (name != null && !name.trim().isEmpty()) {
+
+			products = productService.searchProduct(name);
 		} else {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
 
+			products = productService.getAllProducts(1, PAGE_SIZE);
 		}
 
+		request.setAttribute("products", products);
+		request.setAttribute("pageNumber", 1);
+		request.setAttribute("totalPages", 1);
+
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+		ServletContext servletContext = request.getServletContext();
+		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+		context.setVariable("products", products);
+		context.setVariable("pageNumber", 1);
+		context.setVariable("totalPages", 1);
+		context.setVariable("user", request.getSession().getAttribute("user"));
+
+		response.setContentType("text/html;charset=UTF-8");
+		templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
-
- 
-
-	
-	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-	    String name = request.getParameter("name");
-	    List<Product> products;
-
-	    if (name != null && !name.trim().isEmpty()) {
-	        
-	        products = productService.searchProduct(name);
-	    } else {
-	       
-	        products = productService.getAllProducts(1, PAGE_SIZE);
-	    }
-
-	
-	    request.setAttribute("products", products);
-	    request.setAttribute("pageNumber", 1); 
-	    request.setAttribute("totalPages", 1); 
-
-	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
-	    ServletContext servletContext = request.getServletContext();
-	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
-
-	    context.setVariable("products", products);
-	    context.setVariable("pageNumber", 1); 
-	    context.setVariable("totalPages", 1); 
-	    context.setVariable("user", request.getSession().getAttribute("user"));
-
-
-	    response.setContentType("text/html;charset=UTF-8");
-	    templateEngine.process("views/dashboard/products", context, response.getWriter());
-	}
-
 
 	private void updateProduct(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
-		Long id = Long.parseLong(request.getParameter("id"));
-		
+		List<String> errors = new ArrayList<>();
+		HttpSession session = request.getSession();
+		int stock;
+		double price;
+
+		Long id = Long.parseLong(request.getParameter("productId"));
 		String name = request.getParameter("name");
 		String description = request.getParameter("description");
-		double price = Double.parseDouble(request.getParameter("price"));
-		boolean isDeleted = Boolean.parseBoolean(request.getParameter("isdeleted"));
-		int stock = Integer.parseInt(request.getParameter("stock"));
-		
-		Optional<Product> products = productService.getProduct(id);
-		
-		Product product = new Product();
+		try {
+			stock = Integer.parseInt(request.getParameter("stock"));
+		} catch (Exception e) {
+			errors.add("Stock should be a number");
+			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
+			return;
+		}
+		try {
+			price = Double.parseDouble(request.getParameter("price"));
+		} catch (Exception e) {
+			errors.add("Stock should be a number");
+			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
+			return;
+		}
+
+		Product product = productService.getProduct(id).orElse(null);
+
+		if (product == null) {
+			errors.add("Couldn't find product");
+			session.setAttribute("errorMessages", errors);
+			response.sendRedirect("products");
+			return;
+		}
+
 		product.setName(name);
 		product.setDescription(description);
-		product.setIsDeleted(isDeleted);
 		product.setPrice(price);
 		product.setStock(stock);
-		
-		productService.updateProduct(product);
-		response.sendRedirect(request.getContextPath() + "/dashboard/products");
+
+		errors.addAll(Validator.validateProduct(product));
+
+		if (errors.isEmpty()) {
+			productService.updateProduct(product);
+			session.setAttribute("message", "User updated successfully!");
+		} else {
+			logger.info("errors : " + errors);
+			session.setAttribute("errorMessages", errors);
+		}
+
+		response.sendRedirect("products");
 
 	}
 
@@ -182,26 +227,36 @@ public class ProductServlet extends HttpServlet {
 		double price = Double.parseDouble(request.getParameter("price"));
 		boolean isDeleted = Boolean.parseBoolean(request.getParameter("isdeleted"));
 		int stock = Integer.parseInt(request.getParameter("stock"));
-		
+
 		Product product = new Product();
 		product.setName(name);
 		product.setDescription(description);
 		product.setIsDeleted(isDeleted);
 		product.setPrice(price);
 		product.setStock(stock);
-		
+
 		productService.addProduct(product);
-		response.sendRedirect(request.getContextPath() + "/dashboard/products");
+		response.sendRedirect("products");
 	}
 
 	private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-	    Long id = Long.parseLong(request.getParameter("id"));
-	    
-	    productService.deleteProduct(id);
+			throws ServletException, IOException {
+		Long id = Long.parseLong(request.getParameter("id"));
 
-	    // Redirect to the products page after successful deletion
-	    response.sendRedirect(request.getContextPath() + "/dashboard/products");
+		productService.deleteProduct(id);
+
+		response.sendRedirect("products");
 	}
 
+	private String convertProductToJson(Product product) {
+		StringBuilder json = new StringBuilder("{");
+		json.append("\"id\":").append(product.getId()).append(",");
+		json.append("\"name\":\"").append(product.getName()).append("\",");
+		json.append("\"description\":\"").append(product.getDescription()).append("\",");
+		json.append("\"price\":").append(product.getPrice()).append(",");
+		json.append("\"stock\":").append(product.getStock());
+
+		json.append("}");
+		return json.toString();
+	}
 }
