@@ -43,6 +43,15 @@ public class Order {
 	@JoinTable(name = "order_product", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
 	private List<Product> products;
 
+	@Override
+	public String toString() {
+		return "Order{" +
+				"id=" + id +
+				", orderDate='" + orderDate + '\'' +
+				", orderStatut=" + orderStatut +
+				'}';
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -73,4 +82,12 @@ public class Order {
     public void setProducts(List<Product> value) {
       this.products = value;
     }
+
+	public Client getClient() {
+		return client;
+	}
+
+	public void setClient(Client client) {
+		this.client = client;
+	}
 }

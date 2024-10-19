@@ -8,16 +8,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
 import model.User;
-import model.enums.Role;
 import util.ThymeleafUtil;
 
 import java.io.IOException;
 
 public class DashboardServlet extends HttpServlet {
+	private static final Logger logger = LoggerFactory.getLogger(DashboardServlet.class);
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -27,14 +29,12 @@ public class DashboardServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 
-		User user = new User();
-		user.setFirstName("admin");
-		user.setEmail("admin@youcode.ma");
-		user.setRole(Role.ADMIN);
-
-		session.setAttribute("user", user);
-
 		User loggedInUser = (User) session.getAttribute("user");
+
+		if(loggedInUser == null){
+			response.sendRedirect("/Commandos");	
+			return;
+		}
 
 		// Prepare a Thymeleaf context if you need to pass any model data
 		ServletContext servletContext = request.getServletContext();

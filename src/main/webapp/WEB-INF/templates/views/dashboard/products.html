@@ -53,9 +53,6 @@
                   required />
               </div>
 
-
-
-
               <button type="submit"
                 class="w-full text-white bg-[#233876] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                 Save
@@ -105,7 +102,7 @@
               <th class="py-3 px-4 border-b">Description</th>
               <th class="py-3 px-4 border-b">Stock</th>
               <th class="py-3 px-4 border-b">Price</th>
-              <th class="py-3 px-4 border-b">Actions</th>
+              <th th:unless="${user.role.name() == 'CLIENT'}" class="py-3 px-4 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -119,7 +116,7 @@
               <td class="py-3 px-4 border-b" th:text="${product.description}">Description</td>
               <td class="py-3 px-4 border-b" th:text="${product.stock}">Stock</td>
               <td class="py-3 px-4 border-b" th:text="${product.price}">Price</td>
-              <td class="py-3 px-4 border-b flex items-center justify-center space-x-2">
+              <td th:unless="${user.role.name() == 'CLIENT'}" class="py-3 px-4 border-b flex items-center justify-center space-x-2">
 
                 <button onclick="openModal(event, 'update')"
                   class="bg-[#435274] text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-200 block">

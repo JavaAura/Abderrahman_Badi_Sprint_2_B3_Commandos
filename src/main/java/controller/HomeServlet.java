@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 
@@ -16,6 +18,7 @@ import model.User;
 import util.ThymeleafUtil;
 
 public class HomeServlet extends HttpServlet {
+	private static final Logger logger = LoggerFactory.getLogger(HomeServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,17 +29,19 @@ public class HomeServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        User user = new User();
-        user.setFirstName("admin");
-        user.setEmail("admin@youcode.ma");
-
-        session.setAttribute("user", user);
-
         User loggedInUser = (User) session.getAttribute("user");
+
+        String message = (String) session.getAttribute("errorMessage");
 
         // Prepare a Thymeleaf context if you need to pass any model data
         ServletContext servletContext = request.getServletContext();
         WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+        if (message != null) {
+            context.setVariable("errorMessage", message);
+            session.removeAttribute("errorMessage");
+        }
+
         context.setVariable("user", loggedInUser);
 
         // Set content type for the response

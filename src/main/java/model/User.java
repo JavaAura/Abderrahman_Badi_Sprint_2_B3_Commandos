@@ -57,9 +57,21 @@ public class User {
 				", email=" + email +
 				", password=" + password +
 				", role=" + role +
-				", isDeleted=" + isDeleted +
-				'}';
+				", isDeleted=" + isDeleted;
 	}
+
+	public User(){
+
+	}
+
+	public User(String firstName, String lastName, String email, String password, Role role) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+	}
+	
 
 	public Long getId() {
 		return id;

@@ -42,9 +42,14 @@ public class ProductService {
 	public void deleteProduct(Long id) {
 		productRepository.delete(id);
 	}
-	
+
 	public long getTotalProductCount() {
 		return productRepository.getTotalProductCount();
+	}
+	
+
+	public List<Product> getAllProducts(){
+		return  productRepository.getAllProducts();
 	}
 
 }

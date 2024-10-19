@@ -139,6 +139,10 @@ public class JpaInitializer implements ServletContextListener {
             product6.setPrice(24.99);
             product6.setStock(20);
             entityManager.persist(product6);
+            
+            // ----------------------------------
+            
+            
 
             transaction.commit();
         } catch (Exception e) {

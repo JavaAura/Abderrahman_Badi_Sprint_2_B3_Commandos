@@ -11,3 +11,7 @@ function toggleMenu() {
   document.getElementById("arrow_icon").classList.toggle("rotate-180")
 }
 
+function closeMessagePopup(event) {
+  let message_container = event.currentTarget;
+  message_container.classList.add("hidden");
+}

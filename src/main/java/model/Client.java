@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
+import model.enums.Role;
+
 @Entity
 public class Client extends User {
 
@@ -23,8 +25,20 @@ public class Client extends User {
 	public String toString() {
 		return super.toString() +
 				", addressDelivery=" + addressDelivery +
-				", paymentMethod=" + paymentMethod;
+				", paymentMethod=" + paymentMethod +
+                '}';
 	}
+
+    public Client(){
+
+    }
+    
+    public Client(String firstName, String lastName, String email, String password, Role role, String addressDelivery, String paymentMethod) {
+        super(firstName, lastName, email, password, role);
+        this.addressDelivery = addressDelivery;
+		this.paymentMethod = paymentMethod;
+    }
+    
 
     public String getAddressDelivery() {
         return addressDelivery;

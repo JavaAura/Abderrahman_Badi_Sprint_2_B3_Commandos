@@ -3,6 +3,8 @@ package model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import model.enums.Role;
+
 @Entity
 public class Admin extends User {
 
@@ -12,7 +14,17 @@ public class Admin extends User {
 	@Override
 	public String toString() {
 		return super.toString() +
-				", levelAccess=" + levelAccess;
+				", levelAccess=" + levelAccess +
+				'}';
+	}
+
+	public Admin(){
+
+	}
+
+	public Admin(String firstName, String lastName, String email, String password, Role role){
+		super(firstName, lastName, email, password, role);
+		this.levelAccess = 2;
 	}
 
 	public int getLevelAccess() {
