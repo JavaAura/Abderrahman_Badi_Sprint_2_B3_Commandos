@@ -25,7 +25,6 @@ public class OrderServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(OrderServlet.class);
 
-
 	private OrderRepository repository;
 	private OrderService orderService;
 
@@ -39,17 +38,40 @@ public class OrderServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
-
 		HttpSession session = request.getSession();
 		User loggedInUser = (User) session.getAttribute("user");
 
 		logger.info("Session user: " + loggedInUser);
 
 		if (loggedInUser == null) {
-			response.sendRedirect("/Commandos");	
+			response.sendRedirect("/Commandos");
 			return;
 		}
+
+		switch (loggedInUser.getRole()) {
+			case ADMIN:
+				showAllOrders(request, response, loggedInUser);
+				break;
+
+			case CLIENT:
+				showCLientOrders(request, response, loggedInUser);
+				break;
+
+			default:
+				response.sendRedirect("/Commandos");
+				return;
+		}
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+	}
+
+	protected void showCLientOrders(HttpServletRequest request, HttpServletResponse response, User loggedInUser)
+			throws ServletException, IOException {
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
 
 		ServletContext servletContext = request.getServletContext();
 		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
@@ -68,10 +90,8 @@ public class OrderServlet extends HttpServlet {
 
 		int size = 5;
 
-
 		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
 		logger.info("Orders retrieved: " + orderList_No_historique);
-
 
 		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
 		int totalPages = (int) Math.ceil((double) totalOrders / size);
@@ -84,9 +104,7 @@ public class OrderServlet extends HttpServlet {
 		templateEngine.process("views/dashboard/order", context, response.getWriter());
 	}
 
-
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void showAllOrders(HttpServletRequest request, HttpServletResponse response, User loggedInUser)
 			throws ServletException, IOException {
 
 	}
