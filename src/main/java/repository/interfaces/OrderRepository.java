@@ -2,7 +2,7 @@ package repository.interfaces;
 
 import java.util.List;
 import model.Order;
-import model.enums.Statut;
+import model.User;
 
 public interface OrderRepository {
 
@@ -21,6 +21,7 @@ public interface OrderRepository {
     boolean canModify(Order order);
 
     public int getTotalOrderCount();
-    public int getTotalOrderCountByStatus();
+
+    public int getClientTotalOrderCountByStatus(User user);
 
 }

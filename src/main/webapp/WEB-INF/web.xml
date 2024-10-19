@@ -18,6 +18,16 @@
     <servlet-name>DashboardServlet</servlet-name>
     <url-pattern>/dashboard</url-pattern>
   </servlet-mapping>
+  
+ <servlet>
+    <servlet-name>ProductServlet</servlet-name>
+    <servlet-class>controller.ProductServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>ProductServlet</servlet-name>
+    <url-pattern>/dashboard/products</url-pattern>
+</servlet-mapping>
+
 
   <servlet>
     <servlet-name>UserServlet</servlet-name>
@@ -44,6 +54,7 @@
   <servlet-mapping>
     <servlet-name>LoginServlet</servlet-name>
     <url-pattern>/login</url-pattern>
+    <url-pattern>/logout</url-pattern>
   </servlet-mapping>
 
 

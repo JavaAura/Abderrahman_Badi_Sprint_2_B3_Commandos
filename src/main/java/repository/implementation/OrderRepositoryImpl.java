@@ -1,6 +1,7 @@
 package repository.implementation;
 
 import model.Order;
+import model.User;
 import model.enums.Statut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import util.PersistenceUtil;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -149,12 +151,15 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public int getTotalOrderCountByStatus() {
+    public int getClientTotalOrderCountByStatus(User user) {
         EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
         try {
-            String queryStr = "SELECT COUNT(o) FROM Order o WHERE o.orderStatut IN (:statusList)";
+            String queryStr = "SELECT COUNT(o) FROM Order o WHERE o.orderStatut IN (:statusList) AND o.client.id = :userId";
             TypedQuery<Long> query = entityManager.createQuery(queryStr, Long.class);
             query.setParameter("statusList", Arrays.asList(Statut.WAITING, Statut.PROCESSING, Statut.SHIPPED));
+
+            query.setParameter("userId", user.getId());
+
             Long count = query.getSingleResult();
             return count.intValue();
         } finally {

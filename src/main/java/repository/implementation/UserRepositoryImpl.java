@@ -84,12 +84,12 @@ public class UserRepositoryImpl implements UserRepository {
 			if (accessLevel == 1) {
                 typedQuery = entityManager
                         .createQuery(
-                                "SELECT u FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
+                                "SELECT u FROM User u WHERE u.isDeleted = false AND TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ORDER BY u.id ASC",
                                 User.class);
             } else {
                 typedQuery = entityManager
                         .createQuery(
-                                "SELECT c FROM Client c ",
+                                "SELECT c FROM Client c WHERE c.isDeleted = false ORDER BY c.id",
                                 User.class);
             }
 
@@ -115,12 +115,12 @@ public class UserRepositoryImpl implements UserRepository {
             if (accessLevel == 1) {
                 countQuery = entityManager
                         .createQuery(
-                                "SELECT COUNT(u) FROM User u WHERE TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
+                                "SELECT COUNT(u) FROM User u WHERE u.isDeleted = false AND TYPE(u) != Admin OR (TYPE(u) = Admin AND u.levelAccess != 1) ",
                                 Long.class);
             } else {
                 countQuery = entityManager
                         .createQuery(
-                                "SELECT COUNT(c) FROM Client c ",
+                                "SELECT COUNT(c) FROM Client c WHERE c.isDeleted = false ",
                                 Long.class);
             }
 
@@ -166,7 +166,7 @@ public class UserRepositoryImpl implements UserRepository {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
-			logger.error("Error creating user: ", e);
+			logger.error("Error updating user: ", e);
 		} finally {
 			entityManager.close();
 		}
@@ -195,3 +195,4 @@ public class UserRepositoryImpl implements UserRepository {
 		}
 	}
 }
+

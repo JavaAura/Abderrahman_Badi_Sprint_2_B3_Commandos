@@ -69,12 +69,12 @@ public class ProductServiceTest {
 
     @Test
     public void getAllProductsTest() {
-        when(productRepository.getAll(1)).thenReturn(productList);
-        List<Product> result = productService.getAllProducts(1);
+        when(productRepository.getAll(1,5)).thenReturn(productList);
+        List<Product> result = productService.getAllProducts(1,5);
         assertEquals(2, result.size());
         assertEquals("PS Vita", result.get(0).getName());
         assertEquals("PS Vita 2", result.get(1).getName());
-        verify(productRepository).getAll(1);
+        verify(productRepository).getAll(1,5);
     }
 
     @Test

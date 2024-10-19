@@ -1,6 +1,7 @@
 package service;
 
 import model.Order;
+import model.User;
 import model.enums.Statut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class OrderService {
         return  orderRepository.getTotalOrderCount();
     }
 
-    public int getTotalOrderCountByStatus(){
-        return  orderRepository.getTotalOrderCountByStatus();
+    public int getTotalOrderCountByStatus(User user){
+        return  orderRepository.getClientTotalOrderCountByStatus(user);
     }
 }

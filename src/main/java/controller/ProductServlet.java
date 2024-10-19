@@ -1,17 +1,25 @@
 package controller;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
+import model.Admin;
 import model.Product;
+import model.User;
+import model.enums.Role;
 import repository.implementation.ProductRepositoryImpl;
 import repository.interfaces.ProductRepository;
 import service.ProductService;
+import util.ThymeleafUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,24 +28,71 @@ import java.util.Optional;
 public class ProductServlet extends HttpServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
+	 private static final int PAGE_SIZE = 4;
 
 	private final ProductRepository productRepository = new ProductRepositoryImpl();
 	private final ProductService productService = new ProductService(productRepository);
 
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
+	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+	    ServletContext servletContext = request.getServletContext();
+	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
-		String action = request.getParameter("action");
+	    HttpSession session = request.getSession();
+	    
+	  
+	    Admin user = new Admin();
+	    user.setFirstName("admin");
+	    user.setEmail("admin@youcode.ma");
+	    user.setRole(Role.ADMIN);
+	    user.setLevelAccess(1);
+	    
+	
+	    session.setAttribute("user", user);
+	    
+	   
+	    User loggedInUser = (User) session.getAttribute("user");
 
-		if ("list".equals(action)) {
-			getAllProducts(request, response);
-		} else if ("get".equals(action)) {
-			getProduct(request, response);
-		} else {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
-		}
+	   
+	    if (loggedInUser == null || loggedInUser.getRole() != Role.ADMIN) {
+	        logger.warn("Unauthorized access attempt by user: {}", (loggedInUser != null ? loggedInUser.getEmail() : "unknown"));
+	        response.sendRedirect("/login");  
+	        return;
+	    }
 
+	  
+	    int page = 1;
+	    String pageParam = request.getParameter("page");
+	    if (pageParam != null) {
+	        try {
+	            page = Integer.parseInt(pageParam);
+	        } catch (NumberFormatException e) {
+	            logger.error("Error parsing pageParam: {}", pageParam, e);
+	        }
+	    }
+
+	   
+	    List<Product> products = productService.getAllProducts(page, PAGE_SIZE); 
+	    long totalProductCount = productService.getTotalProductCount(); 
+	    int totalPages = (int) Math.ceil((double) totalProductCount / PAGE_SIZE);
+
+
+	    context.setVariable("user", loggedInUser);
+	    context.setVariable("products", products);
+	    context.setVariable("totalPages", totalPages); 
+	    context.setVariable("pageNumber", page);
+
+	    
+	    response.setContentType("text/html;charset=UTF-8");
+
+	  
+	    templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
+
+
+
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -59,38 +114,39 @@ public class ProductServlet extends HttpServlet {
 
 	}
 
+ 
 
-	private void getProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		Long id = Long.parseLong(request.getParameter("id"));
-		Optional<Product> product = productService.getProduct(id);
-		
-		if(product.isPresent()) {
-			request.setAttribute("product", product);
-			request.getRequestDispatcher("/productDetails.html").forward(request, response);
-		}else {
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Product not found");
-		}
-
-	}
-
-	private void getAllProducts(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		
-		int pageNumber = Integer.parseInt(request.getParameter("id"));
-		List<Product> products = productService.getAllProducts(pageNumber);
-		request.setAttribute("products", products);
-		request.getRequestDispatcher("/products.html").forward(request, response);
-
-	}
 	
 	private void searchProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		String name = request.getParameter("name");
-		List<Product> products = productService.searchProduct(name);
-		request.setAttribute("products", products);
-		request.getRequestDispatcher("/products.html").forward(request, response);
+	        throws ServletException, IOException {
+	    String name = request.getParameter("name");
+	    List<Product> products;
 
+	    if (name != null && !name.trim().isEmpty()) {
+	        
+	        products = productService.searchProduct(name);
+	    } else {
+	       
+	        products = productService.getAllProducts(1, PAGE_SIZE);
+	    }
+
+	
+	    request.setAttribute("products", products);
+	    request.setAttribute("pageNumber", 1); 
+	    request.setAttribute("totalPages", 1); 
+
+	    TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+	    ServletContext servletContext = request.getServletContext();
+	    WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+	    context.setVariable("products", products);
+	    context.setVariable("pageNumber", 1); 
+	    context.setVariable("totalPages", 1); 
+	    context.setVariable("user", request.getSession().getAttribute("user"));
+
+
+	    response.setContentType("text/html;charset=UTF-8");
+	    templateEngine.process("views/dashboard/products", context, response.getWriter());
 	}
 
 
@@ -115,7 +171,7 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.updateProduct(product);
-		response.sendRedirect("products?action=list&page=1");
+		response.sendRedirect(request.getContextPath() + "/dashboard/products");
 
 	}
 
@@ -135,15 +191,17 @@ public class ProductServlet extends HttpServlet {
 		product.setStock(stock);
 		
 		productService.addProduct(product);
-		response.sendRedirect("products?action=list&page=1");
+		response.sendRedirect(request.getContextPath() + "/dashboard/products");
 	}
 
 	private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		Long id = Long.parseLong(request.getParameter("id"));
-		productService.deleteProduct(id);
-		response.sendRedirect("products?action=list&page=1");
-		
-		
+	        throws ServletException, IOException {
+	    Long id = Long.parseLong(request.getParameter("id"));
+	    
+	    productService.deleteProduct(id);
+
+	    // Redirect to the products page after successful deletion
+	    response.sendRedirect(request.getContextPath() + "/dashboard/products");
 	}
+
 }
