@@ -77,7 +77,7 @@ public class UserServlet extends HttpServlet {
 				page = Integer.parseInt(pageParam);
 			} catch (NumberFormatException e) {
 				logger.error("Error parsing pageParam", e);
-				templateEngine.process("views/dashboard/users", context, response.getWriter());
+				templateEngine.process("views/dashboard/admin/users", context, response.getWriter());
 			}
 		}
 
@@ -92,7 +92,7 @@ public class UserServlet extends HttpServlet {
 		// Set content type for the response
 		response.setContentType("text/html;charset=UTF-8");
 
-		templateEngine.process("views/dashboard/users", context, response.getWriter());
+		templateEngine.process("views/dashboard/admin/users", context, response.getWriter());
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -136,7 +136,7 @@ public class UserServlet extends HttpServlet {
 			}
 		}
 		response.sendRedirect("users");
-	}
+	}	
 
 	protected void addUser(HttpServletRequest request, HttpServletResponse response) {
 		List<String> errors = new ArrayList<>();

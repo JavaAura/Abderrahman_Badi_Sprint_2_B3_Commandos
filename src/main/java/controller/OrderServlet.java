@@ -66,7 +66,23 @@ public class OrderServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = request.getParameter("action");
+		if (action != null) {
+			switch (action) {
+				case "add":
+					break;
+				case "delete":
+					break;
+				case "update":
+					break;
+				case "update_status":
 
+					return;
+				default:
+					break;
+			}
+		}
+		response.sendRedirect("order");
 	}
 
 	protected void showCLientOrders(HttpServletRequest request, HttpServletResponse response, User loggedInUser)
@@ -106,6 +122,36 @@ public class OrderServlet extends HttpServlet {
 
 	protected void showAllOrders(HttpServletRequest request, HttpServletResponse response, User loggedInUser)
 			throws ServletException, IOException {
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
 
+		ServletContext servletContext = request.getServletContext();
+		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+		context.setVariable("user", loggedInUser);
+
+		// Pagination setup
+		int page = 1;
+		String pageParam = request.getParameter("page");
+		if (pageParam != null && !pageParam.isEmpty()) {
+			try {
+				page = Integer.parseInt(pageParam);
+			} catch (NumberFormatException e) {
+				page = 1;
+			}
+		}
+
+		int size = 5;
+
+		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
+		logger.info("Orders retrieved: " + orderList_No_historique);
+
+		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
+		int totalPages = (int) Math.ceil((double) totalOrders / size);
+
+		context.setVariable("orderList_No_historique", orderList_No_historique);
+		context.setVariable("pageNumber", page);
+		context.setVariable("totalPages", totalPages);
+
+		response.setContentType("text/html;charset=UTF-8");
+		templateEngine.process("views/dashboard/admin/order", context, response.getWriter());
 	}
 }
