@@ -153,21 +153,20 @@ public class OrderServlet extends HttpServlet {
 					break;
 				case "update":
 
-
 					try {
-						Long orderId = Long.parseLong(request.getParameter("id")); // Récupération de l'ID de la commande
-						Order orderToUpdate = orderService.getOrderById(orderId); // Récupération de la commande à mettre à jour
+						Long orderId = Long.parseLong(request.getParameter("id"));
+						Order orderToUpdate = orderService.getOrderById(orderId);
 
 						if (orderToUpdate == null) {
 							response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
 							return;
 						}
 
-						// Récupération des nouveaux détails de la commande
+					    System.out.println("upadet buuuuuuuuuuuuuuuuuuuuuuuuuuuussssssssssssssssssssssssssssssssssssssssssss");
 						String newStatus = request.getParameter("status");
 						orderToUpdate.setOrderStatut(Statut.valueOf(newStatus));
 
-						// Récupérer les produits sélectionnés
+
 						String[] selectedProductIds = request.getParameterValues("selectedProducts");
 						List<Product> selectedProducts = new ArrayList<>();
 
@@ -190,7 +189,7 @@ public class OrderServlet extends HttpServlet {
 						response.setStatus(HttpServletResponse.SC_OK);
 						response.setContentType("application/json");
 						response.getWriter().write("{\"message\": \"Order updated successfully!\"}");
-						
+
 						String referer = request.getHeader("Referer");
 						response.sendRedirect(referer);
 					} catch (IllegalArgumentException e) {

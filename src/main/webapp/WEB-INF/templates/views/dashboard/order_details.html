@@ -13,6 +13,9 @@
 
             <form action="" method="post">
 
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="id" th:value="${order.id}">
+
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="productSelect">
                         Update Order
@@ -30,21 +33,15 @@
 
                 <h3 class="text-lg font-bold mb-2">Products in Order:</h3>
                 <ul>
-                    <!-- Afficher les produits dans la commande -->
                     <th:block th:each="product : ${mesProduct}">
                         <li th:text="${product.name}"></li>
                     </th:block>
                 </ul>
 
-                <input type="hidden" name="action" value="update"> <!-- Indiquer l'action à effectuer -->
-                <input type="hidden" name="id" th:value="${order.id}"> <!-- ID de la commande à mettre à jour -->
+
 
                 <div class="flex items-center justify-between">
-                    <button
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="submit">
-                        Submit
-                    </button>
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">Submit</button>
                 </div>
             </form>
 
