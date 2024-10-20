@@ -52,4 +52,11 @@ public class ProductService {
 		return  productRepository.getAllProducts();
 	}
 
+
+
+	public List<Product> getMesProducts(Long orderId){
+		return  productRepository.getMesProducts(orderId);
+	}
+
+
 }

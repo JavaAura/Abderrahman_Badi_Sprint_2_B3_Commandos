@@ -2,30 +2,54 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{dashboard_layout}">
 
 <head>
-
+    <title>Order Details</title>
 </head>
-
-<script>
-    //JavaScript to handle the modal visibility
-    function toggleModal() {
-      const modal = document.getElementById('orderModal');
-      modal.classList.toggle('hidden');
-      modal.classList.toggle('flex');
-    }
-</script>
 
 <body>
 <div class="bg-gray-100 flex items-center justify-center">
-
-
     <section layout:fragment="content" class="flex flex-col items-center justify-between pt-8 w-11/12 mx-auto min-h-[80vh]">
-    <p> updte</p>
+        <div class="w-full max-w-sm mx-auto bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-center mb-6">Select Product to Update Order</h2>
 
+            <form action="" method="post">
 
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="productSelect">
+                        Update Order
+                    </label>
+                    <select
+                            class="block w-full mt-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
+                            id="productSelect"
+                            name="selectedProducts"
+                            multiple size="4">
+                        <th:block th:each="product : ${ListProducts}">
+                            <option th:value="${product.id}" th:text="${product.name}"></option>
+                        </th:block>
+                    </select>
+                </div>
 
+                <h3 class="text-lg font-bold mb-2">Products in Order:</h3>
+                <ul>
+                    <!-- Afficher les produits dans la commande -->
+                    <th:block th:each="product : ${mesProduct}">
+                        <li th:text="${product.name}"></li>
+                    </th:block>
+                </ul>
+
+                <input type="hidden" name="action" value="update"> <!-- Indiquer l'action à effectuer -->
+                <input type="hidden" name="id" th:value="${order.id}"> <!-- ID de la commande à mettre à jour -->
+
+                <div class="flex items-center justify-between">
+                    <button
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            type="submit">
+                        Submit
+                    </button>
+                </div>
+            </form>
+
+        </div>
     </section>
-
-
 </div>
 </body>
 

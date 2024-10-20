@@ -97,7 +97,7 @@ public class OrderServlet extends HttpServlet {
 		String action = request.getParameter("action");
 
 
-		
+
 
 		if (action != null) {
 			switch (action) {
@@ -152,7 +152,59 @@ public class OrderServlet extends HttpServlet {
 					}
 					break;
 				case "update":
+
+
+					try {
+						Long orderId = Long.parseLong(request.getParameter("id")); // Récupération de l'ID de la commande
+						Order orderToUpdate = orderService.getOrderById(orderId); // Récupération de la commande à mettre à jour
+
+						if (orderToUpdate == null) {
+							response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
+							return;
+						}
+
+						// Récupération des nouveaux détails de la commande
+						String newStatus = request.getParameter("status");
+						orderToUpdate.setOrderStatut(Statut.valueOf(newStatus));
+
+						// Récupérer les produits sélectionnés
+						String[] selectedProductIds = request.getParameterValues("selectedProducts");
+						List<Product> selectedProducts = new ArrayList<>();
+
+						if (selectedProductIds != null) {
+							for (String productId : selectedProductIds) {
+								Optional<Product> optionalProduct = productService.getProduct(Long.parseLong(productId));
+								if (optionalProduct.isPresent()) {
+									selectedProducts.add(optionalProduct.get());
+								} else {
+									logger.warn("Product with ID {} not found", productId);
+								}
+							}
+						}
+
+						orderToUpdate.setProducts(selectedProducts);
+
+						Order updatedOrder = orderService.updateOrder(orderToUpdate, loggedInUser);
+						logger.info("Order with ID " + updatedOrder.getId() + " has been updated.");
+
+						response.setStatus(HttpServletResponse.SC_OK);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"message\": \"Order updated successfully!\"}");
+						
+						String referer = request.getHeader("Referer");
+						response.sendRedirect(referer);
+					} catch (IllegalArgumentException e) {
+						logger.error("Invalid status value: {}", e.getMessage());
+						response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid status value");
+					} catch (Exception e) {
+						logger.error("Error updating order: {}", e.getMessage());
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"Error updating order\"}");
+					}
 					break;
+
+
 				case "update_status":
 					try {
 						long orderId = Long.parseLong(request.getParameter("order_id"));
@@ -277,8 +329,11 @@ public class OrderServlet extends HttpServlet {
 		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 
 		try {
-
+			List<Product> ListProducts = productService.getAllProducts();
 			Order order = orderService.getOrderById(orderId);
+			List<Product> mesProduct = productService.getMesProducts(orderId);
+			System.out.println("kolchi !!! product  : " + ListProducts);
+			System.out.println("mes product  : " + mesProduct);
 			logger.info("order in order details are : " + order);
 
 			if (order != null) {
@@ -290,6 +345,8 @@ public class OrderServlet extends HttpServlet {
 
 				context.setVariable("user", loggedInUser);
 				context.setVariable("order", order);
+				context.setVariable("ListProducts",ListProducts );
+				context.setVariable("mesProduct",mesProduct);
 				response.setContentType("text/html;charset=UTF-8");
 				templateEngine.process("views/dashboard/order_details", context, response.getWriter());
 			} else {
