@@ -162,7 +162,7 @@ public class OrderServlet extends HttpServlet {
 							return;
 						}
 
-					    System.out.println("upadet buuuuuuuuuuuuuuuuuuuuuuuuuuuussssssssssssssssssssssssssssssssssssssssssss");
+					    logger.info("upadet buss");
 						String newStatus = request.getParameter("status");
 						orderToUpdate.setOrderStatut(Statut.valueOf(newStatus));
 
@@ -202,7 +202,6 @@ public class OrderServlet extends HttpServlet {
 						response.getWriter().write("{\"error\": \"Error updating order\"}");
 					}
 					break;
-
 
 				case "update_status":
 					try {
