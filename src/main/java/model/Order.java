@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,10 +37,10 @@ public class Order {
 	private Statut orderStatut;
 
 	@JoinColumn(name = "client_id", nullable = false)
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Client client;
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "order_product", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
 	private List<Product> products;
 
@@ -76,12 +77,13 @@ public class Order {
 		this.orderStatut = orderStatut;
 	}
 
-    public List<Product> getProducts() {
-      return this.products;
-    }
-    public void setProducts(List<Product> value) {
-      this.products = value;
-    }
+	public List<Product> getProducts() {
+		return this.products;
+	}
+
+	public void setProducts(List<Product> value) {
+		this.products = value;
+	}
 
 	public Client getClient() {
 		return client;

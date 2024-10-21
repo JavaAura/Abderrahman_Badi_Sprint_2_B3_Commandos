@@ -8,6 +8,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import model.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,6 +181,28 @@ public class ProductRepositoryImpl implements ProductRepository {
 
 		return products;
 	}
+
+
+
+	@Override
+	public List<Product> getMesProducts(Long orderId) {
+		EntityManager entityManager = PersistenceUtil.getEntityManagerFactory().createEntityManager();
+		try {
+
+			Order order = entityManager.find(Order.class, orderId);
+
+
+			if (order != null) {
+
+				return order.getProducts();
+			} else {
+				throw new IllegalArgumentException("Order with ID " + orderId + " not found.");
+			}
+		} finally {
+			entityManager.close();
+		}
+	}
+
 
 
 

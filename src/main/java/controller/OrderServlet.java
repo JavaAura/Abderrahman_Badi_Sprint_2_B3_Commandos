@@ -1,5 +1,6 @@
 package controller;
 
+import model.Client;
 import model.Order;
 import model.Product;
 import model.User;
@@ -24,7 +25,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OrderServlet extends HttpServlet {
 
@@ -63,7 +67,14 @@ public class OrderServlet extends HttpServlet {
 				break;
 
 			case CLIENT:
-				showCLientOrders(request, response, loggedInUser);
+				String orderIdParam = request.getParameter("order_id");
+				if (orderIdParam != null && !orderIdParam.trim().isEmpty()) {
+					long orderId = Long.parseLong(orderIdParam);
+					logger.info("Order id is here : " + orderId);
+					showOrderDetails(request, response, orderId, loggedInUser);
+				} else {
+					showCLientOrders(request, response, loggedInUser);
+				}
 				break;
 
 			default:
@@ -84,14 +95,114 @@ public class OrderServlet extends HttpServlet {
 		}
 
 		String action = request.getParameter("action");
+
+
+
+
 		if (action != null) {
 			switch (action) {
 				case "add":
-					break;
+					try {
+						String[] selectedProductIds = request.getParameterValues("selectedProducts");
+						List<Product> selectedProducts = new ArrayList<>();
+
+						if (selectedProductIds != null) {
+							for (String productId : selectedProductIds) {
+								Optional<Product> optionalProduct = productService
+										.getProduct(Long.parseLong(productId));
+								if (optionalProduct.isPresent()) {
+									selectedProducts.add(optionalProduct.get());
+								} else {
+
+									logger.warn("Produit avec l'ID {} non trouvé", productId);
+								}
+							}
+						}
+
+						Client client = (Client) loggedInUser;
+						addOrderWithProducts(selectedProducts, client);
+
+						String Refererche = request.getHeader("Referer");
+						response.sendRedirect(Refererche);
+
+						response.setStatus(HttpServletResponse.SC_OK);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"message\": \"Order added successfully !\"}");
+					} catch (Exception e) {
+						logger.error("Erreur lors de l'ajout de la commande : {}", e.getMessage());
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"Erreur lors de l'ajout de la commande\"}");
+					}
+
 				case "delete":
+					Long order_Id = Long.parseLong(request.getParameter("id"));
+
+					try {
+
+						orderService.deleteOrder(order_Id);
+						logger.info("Order with ID " + order_Id + " has been deleted.");
+
+						String referer = request.getHeader("Referer");
+						response.sendRedirect(referer);
+						return;
+					} catch (Exception e) {
+						logger.error("Error deleting order", e);
+						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting order");
+					}
 					break;
 				case "update":
+
+					try {
+						Long orderId = Long.parseLong(request.getParameter("id"));
+						Order orderToUpdate = orderService.getOrderById(orderId);
+
+						if (orderToUpdate == null) {
+							response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
+							return;
+						}
+
+					    logger.info("upadet buss");
+						String newStatus = request.getParameter("status");
+						orderToUpdate.setOrderStatut(Statut.valueOf(newStatus));
+
+
+						String[] selectedProductIds = request.getParameterValues("selectedProducts");
+						List<Product> selectedProducts = new ArrayList<>();
+
+						if (selectedProductIds != null) {
+							for (String productId : selectedProductIds) {
+								Optional<Product> optionalProduct = productService.getProduct(Long.parseLong(productId));
+								if (optionalProduct.isPresent()) {
+									selectedProducts.add(optionalProduct.get());
+								} else {
+									logger.warn("Product with ID {} not found", productId);
+								}
+							}
+						}
+
+						orderToUpdate.setProducts(selectedProducts);
+
+						Order updatedOrder = orderService.updateOrder(orderToUpdate, loggedInUser);
+						logger.info("Order with ID " + updatedOrder.getId() + " has been updated.");
+
+						response.setStatus(HttpServletResponse.SC_OK);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"message\": \"Order updated successfully!\"}");
+
+						String referer = request.getHeader("Referer");
+						response.sendRedirect(referer);
+					} catch (IllegalArgumentException e) {
+						logger.error("Invalid status value: {}", e.getMessage());
+						response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid status value");
+					} catch (Exception e) {
+						logger.error("Error updating order: {}", e.getMessage());
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\": \"Error updating order\"}");
+					}
 					break;
+
 				case "update_status":
 					try {
 						long orderId = Long.parseLong(request.getParameter("order_id"));
@@ -149,8 +260,6 @@ public class OrderServlet extends HttpServlet {
 		List<Order> orderList_No_historique = orderService.getAllOrders_No_historique(loggedInUser.getId(), page, size);
 		List<Product> products = productService.getAllProducts();
 
-		logger.info("Orders retrieved: " + orderList_No_historique);
-
 		int totalOrders = orderService.getTotalOrderCountByStatus(loggedInUser);
 		int totalPages = (int) Math.ceil((double) totalOrders / size);
 
@@ -171,7 +280,6 @@ public class OrderServlet extends HttpServlet {
 		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
 		context.setVariable("user", loggedInUser);
 
-		// Pagination setup
 		int page = 1;
 		String pageParam = request.getParameter("page");
 		if (pageParam != null && !pageParam.isEmpty()) {
@@ -198,4 +306,57 @@ public class OrderServlet extends HttpServlet {
 		response.setContentType("text/html;charset=UTF-8");
 		templateEngine.process("views/dashboard/admin/order", context, response.getWriter());
 	}
+
+	public void addOrderWithProducts(List<Product> products, Client client) {
+
+		Order order = new Order();
+		order.setOrderDate(LocalDate.now());
+		order.setOrderStatut(Statut.WAITING);
+		order.setClient(client);
+
+		order.setProducts(products);
+
+		orderService.createOrder(order);
+	}
+
+	protected void showOrderDetails(HttpServletRequest request, HttpServletResponse response, long orderId,
+			User loggedInUser)
+			throws ServletException, IOException {
+		TemplateEngine templateEngine = ThymeleafUtil.getTemplateEngine(request.getServletContext());
+		ServletContext servletContext = request.getServletContext();
+		WebContext context = new WebContext(request, response, servletContext, request.getLocale());
+
+		try {
+			List<Product> ListProducts = productService.getAllProducts();
+			Order order = orderService.getOrderById(orderId);
+			List<Product> mesProduct = productService.getMesProducts(orderId);
+			System.out.println("kolchi !!! product  : " + ListProducts);
+			System.out.println("mes product  : " + mesProduct);
+			logger.info("order in order details are : " + order);
+
+			if (order != null) {
+				if (order.getClient().getId() != loggedInUser.getId()){
+					logger.warn("Order belongs to client with id : " + order.getClient().getId() + " and requested from client with id : " + loggedInUser.getId());
+					response.sendRedirect("/Commandos");
+					return;
+				}
+
+				context.setVariable("user", loggedInUser);
+				context.setVariable("order", order);
+				context.setVariable("ListProducts",ListProducts );
+				context.setVariable("mesProduct",mesProduct);
+				response.setContentType("text/html;charset=UTF-8");
+				templateEngine.process("views/dashboard/order_details", context, response.getWriter());
+			} else {
+				logger.warn("Order with ID {} not found", orderId);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
+				response.sendRedirect("order");
+				return;
+			}
+		} catch (Exception e) {
+			logger.error("Error retrieving order details for ID " + orderId, e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error retrieving order details");
+		}
+	}
+
 }

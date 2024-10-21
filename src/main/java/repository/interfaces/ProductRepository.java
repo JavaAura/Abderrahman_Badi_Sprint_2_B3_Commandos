@@ -21,4 +21,5 @@ public interface ProductRepository {
 
 	void delete(Long id);
 	public List<Product> getAllProducts();
+	public List<Product> getMesProducts(Long orderId);
 }
